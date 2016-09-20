@@ -6,10 +6,10 @@ project(adkalmanfilter)
 ########################################
 set (CMAKE_CXX_STANDARD 11)
 set( CMAKE_EXPORT_COMPILE_COMMANDS 1 )
-set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${PROJECT_SOURCE_DIR}/cmake/")
 
-
-find_package( Eigen 3.3 REQUIRED )
+#find_package(Eigen3 REQUIRED )
+# Hack for now...
+set( EIGEN33_INCLUDE_DIRS "/home/emifre/Git/eigen" )
 
 ###########
 ## Build ##
@@ -19,13 +19,13 @@ find_package( Eigen 3.3 REQUIRED )
 ## Your package locations should be listed before other locations
 # include_directories(include)
 include_directories(
-  ${Eigen_INCLUDE_DIRS}
+  ${EIGEN33_INCLUDE_DIRS}
   include
 )
 
 ## Declare a C++ executable
 add_executable(adkalmanfilter
-  src/test/adekf_test.cpp
+  src/test/adkf_test.cpp
 )
 
 ## Add cmake target dependencies of the executable
@@ -40,3 +40,8 @@ target_link_libraries(adkalmanfilter
   ${catkin_LIBRARIES}
 )
 
+## Printing
+get_cmake_property(_variableNames VARIABLES)
+foreach (_variableName ${_variableNames})
+    message(STATUS "${_variableName}=${${_variableName}}")
+endforeach()
