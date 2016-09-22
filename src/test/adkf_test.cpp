@@ -5,15 +5,16 @@
 using namespace std;
 
 template <typename Scalar>
-struct adFunctor
+struct predFunctor
 {
   static constexpr auto InputSize = 2;
 
   /*
-   * Definitions required by ADKalmanFilter.
+   * Definitions required for input and output type.
+   * Used by the AutoDiff to find Jacobians.
    */
   typedef Eigen::Matrix<Scalar, InputSize, 1> InputType;
-  typedef Eigen::Matrix<Scalar, InputSize, 1> ValueType;
+  typedef Eigen::Matrix<Scalar, InputType::RowsAtCompileTime, 1> ValueType;
 
   /*
    * Implementation starts here.
@@ -25,7 +26,7 @@ struct adFunctor
     T2 &o = *output;
 
     o(0) = input(0) + input(1);
-    o(1) = input(1) + controlSignal(1);
+    o(1) = input(1) + controlSignal(0);
   }
 };
 
@@ -33,7 +34,8 @@ template <typename Scalar>
 struct ResFunctor : public ADKalmanFilter::NoOutlierRejection
 {
   /*
-   * Definitions required by ADKalmanFilter.
+   * Definitions required for input and output type.
+   * Used by the AutoDiff to find Jacobians.
    */
   typedef Eigen::Matrix<Scalar, 2, 1> InputType;
   typedef Eigen::Matrix<Scalar, 1, 1> ValueType;
@@ -54,16 +56,24 @@ struct ResFunctor : public ADKalmanFilter::NoOutlierRejection
 int main(int argc, char *argv[])
 {
   typedef Eigen::Matrix<float, 2, 1> InputType;
+  typedef Eigen::Matrix<float, 1, 1> MeasType;
   typedef Eigen::Matrix<float, 1, 1> RType;
+  typedef Eigen::Matrix<float, 2, 2> QType;
+  typedef Eigen::Matrix<float, 1, 2> HType;
 
-  InputType in;
-  RType R;
+  InputType in = InputType::Zero();
+  MeasType meas = MeasType::Zero();
+  RType R = RType::Identity();
+  QType Q = QType::Identity();
+  HType H = HType::Ones();
   in.setZero();
-  R.setOnes();
 
-  ADKalmanFilter::ADKalmanFilter< adFunctor<float> > kf;
+  ADKalmanFilter::ADKalmanFilter< predFunctor<float> > kf(in, Q);
 
-  kf.innovate< ResFunctor<float> >(in, R);
+  kf.predict(Q, &in);
+
+  kf.update< ResFunctor<float> >(meas, R, &H);
+  kf.update< ResFunctor<float> >(meas, R);
 
   return 0;
 }
