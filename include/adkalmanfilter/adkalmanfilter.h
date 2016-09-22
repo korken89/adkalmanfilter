@@ -153,6 +153,7 @@ public:
        * executes the MeasurementFunctor. */
       adjac(x, &h);
 
+      /* Form LLT version of S for future use. */
       Sllt.compute((*H) * P * (*H).transpose() + R);
       K = Sllt.solve((*H) * P);
 
@@ -165,6 +166,7 @@ public:
       HType Had;
       adjac(x, &h, &Had);
 
+      /* Form LLT version of S for future use. */
       Sllt.compute(Had * P * Had.transpose() + R);
       K = Sllt.solve(Had * P);
 
