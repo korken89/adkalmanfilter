@@ -111,7 +111,7 @@ public:
   /*
    *
    */
-  void getState(Eigen::MatrixBase<StateType> &x_out)
+  EIGEN_STRONG_INLINE void getState(Eigen::MatrixBase<StateType> &x_out)
   {
     x_out = x;
   }
@@ -119,7 +119,7 @@ public:
   /*
    *
    */
-  void setState(const Eigen::MatrixBase<StateType> &x_in)
+  EIGEN_STRONG_INLINE void setState(const Eigen::MatrixBase<StateType> &x_in)
   {
     x = x_in;
   }
@@ -127,7 +127,8 @@ public:
   /*
    *
    */
-  void getStateCovariance(Eigen::MatrixBase<StateCovarianceType> &P_out)
+  EIGEN_STRONG_INLINE
+    void getStateCovariance(Eigen::MatrixBase<StateCovarianceType> &P_out)
   {
     P_out = P;
   }
@@ -135,7 +136,8 @@ public:
   /*
    *
    */
-  void setStateCovariance(const Eigen::MatrixBase<StateCovarianceType> &P_in)
+  EIGEN_STRONG_INLINE
+    void setStateCovariance(const Eigen::MatrixBase<StateCovarianceType> &P_in)
   {
     P = P_in;
   }
@@ -337,7 +339,7 @@ public:
      * in the Kalman Filter equations. */
     Sllt.compute(H * P * H.transpose() + R);
 
-    /* Apply outlier rejection before we do all the heavy calcuations. */
+    /* Apply outlier rejection before we do all the heavy calculations. */
     if (MeasurementFunctor::rejectMeasurement(Sllt, residual) == false)
     {
       /* Update using the positive Joseph form. */
