@@ -7,13 +7,11 @@ using namespace std;
 template <typename Scalar>
 struct predFunctor
 {
-  static constexpr auto InputSize = 2;
-
   /*
    * Definitions required for input and output type.
    * Used by the AutoDiff to find Jacobians.
    */
-  typedef Eigen::Matrix<Scalar, InputSize, 1> InputType;
+  typedef Eigen::Matrix<Scalar, 2, 1> InputType;
   typedef Eigen::Matrix<Scalar, InputType::RowsAtCompileTime, 1> ValueType;
 
   /*
@@ -31,7 +29,7 @@ struct predFunctor
 };
 
 template <typename Scalar>
-struct ResFunctor : public ADKalmanFilter::NoOutlierRejection
+struct measFunctor : public ADKalmanFilter::MahalanobisOutlierRejection<10>
 {
   /*
    * Definitions required for input and output type.
@@ -60,20 +58,66 @@ int main(int argc, char *argv[])
   typedef Eigen::Matrix<float, 1, 1> RType;
   typedef Eigen::Matrix<float, 2, 2> QType;
   typedef Eigen::Matrix<float, 1, 2> HType;
+  typedef Eigen::Matrix<float, 2, 2> FType;
+
+  std::srand((unsigned int) time(0));
 
   InputType in = InputType::Zero();
-  MeasType meas = MeasType::Zero();
+  InputType u = InputType::Zero();
+  MeasType meas;
   RType R = RType::Identity();
   QType Q = QType::Identity();
   HType H = HType::Ones();
+  FType F = FType::Ones();
+  F(1,0) = 0;
   in.setZero();
 
   ADKalmanFilter::ADKalmanFilter< predFunctor<float> > kf(in, Q);
 
-  kf.predict(Q, &in);
+  typedef typename ADKalmanFilter::ADKalmanFilter< predFunctor<float> >::StateType StateType;
 
-  kf.update< ResFunctor<float> >(meas, R, &H);
-  kf.update< ResFunctor<float> >(meas, R);
+  StateType out;
+
+  kf.predict(Q, F, u);
+  //kf.predict(Q, F);
+  kf.predict(Q, u);
+  //kf.predict(Q);
+
+  meas = MeasType::Random();
+  if(kf.update< measFunctor<float> >(meas, R, H))
+    std::cout << "Measurement accepted!" << std::endl;
+  else
+    std::cout << "Measurement rejected!" << std::endl;
+
+  kf.getState(out);
+  std::cout << "x = " << std::endl << out << std::endl << std::endl;
+
+  meas = MeasType::Random()*100;
+  if(kf.update< measFunctor<float> >(meas, R, H))
+    std::cout << "Measurement accepted!" << std::endl;
+  else
+    std::cout << "Measurement rejected!" << std::endl;
+
+  kf.getState(out);
+  std::cout << "x = " << std::endl << out << std::endl << std::endl;
+
+  meas = MeasType::Random();
+  if(kf.update< measFunctor<float> >(meas, R))
+    std::cout << "Measurement accepted!" << std::endl;
+  else
+    std::cout << "Measurement rejected!" << std::endl;
+
+  kf.getState(out);
+  std::cout << "x = " << std::endl << out << std::endl << std::endl;
+
+  meas = MeasType::Random()*100;
+  if(kf.update< measFunctor<float> >(meas, R))
+    std::cout << "Measurement accepted!" << std::endl;
+  else
+    std::cout << "Measurement rejected!" << std::endl;
+
+  kf.getState(out);
+  std::cout << "x = " << std::endl << out << std::endl << std::endl;
 
   return 0;
 }
