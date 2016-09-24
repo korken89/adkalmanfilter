@@ -12,7 +12,7 @@ struct predFunctor
    * Used by the AutoDiff to find Jacobians.
    */
   typedef Eigen::Matrix<Scalar, 2, 1> InputType;
-  typedef Eigen::Matrix<Scalar, InputType::RowsAtCompileTime, 1> ValueType;
+  typedef InputType ValueType; /* In the prediction input size = output size. */
 
   /*
    * Implementation starts here.
@@ -130,11 +130,13 @@ int main(int argc, char *argv[])
   std::cout << "P = " << std::endl << P << std::endl << std::endl;
 
   std::cout << "Running a lot of iterations.. " << std::endl << std::endl;
-  for (auto i = 0; i < 10000000; i++)
+  for (auto i = 0; i < 100000000; i++)
   {
-    meas = MeasType::Random()*10;
+    meas = MeasType::Random()*20;
     kf.update< measFunctor<float> >(meas, R);
   }
+  kf.getState(out);
+  kf.getStateCovariance(P);
   std::cout << "x = " << std::endl << out << std::endl << std::endl;
   std::cout << "P = " << std::endl << P << std::endl << std::endl;
 

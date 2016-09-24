@@ -8,41 +8,6 @@
 namespace ADKalmanFilter {
 
 /*
- * Used for defining no outlier rejection.
- */
-struct NoOutlierRejection
-{
-  template <typename... Params>
-  static EIGEN_STRONG_INLINE bool rejectMeasurement(const Params &...)
-  {
-    return false;
-  }
-};
-
-
-/*
- * Mahalanobis distance based outlier rejection.
- */
-template <int NStdDevs>
-struct MahalanobisOutlierRejection
-{
-  template <typename SMatrix, typename Residual>
-  static EIGEN_STRONG_INLINE
-    bool rejectMeasurement(const Eigen::LLT<SMatrix> &S,
-                           const Eigen::MatrixBase<Residual> &r)
-  {
-    typedef typename Residual::Scalar Scalar;
-
-    /* Calculate the Mahalanobis distance: sqrt( r^T * S^-1 * r ) */
-    Scalar mah = sqrt(r.transpose() * S.solve(r));
-
-    /* Simple thresholding for testing measurements. */
-    return Scalar(NStdDevs) < mah;
-  }
-};
-
-
-/*
  *
  */
 template <typename PredictionFunctor>
@@ -332,20 +297,21 @@ public:
     /*
      * Implementation.
      */
-    Eigen::LLT<RType> Sllt;
+    RType Sinv;
 
-    /* Form LLT version of S for future use in the outlier rejection and
+    /* Form inverse of S for future use in the outlier rejection and
      * in the Kalman Filter equations. */
-    Sllt.compute(H * P * H.transpose() + R);
+    Sinv = (H * P * H.transpose() + R).inverse();
+    /* Testing showed this to be faster than using Eigen::LLT. */
 
     /* Apply outlier rejection before we do all the heavy calculations. */
-    if (MeasurementFunctor::rejectMeasurement(Sllt, residual) == false)
+    if (MeasurementFunctor().rejectMeasurement(Sinv, residual) == false)
     {
       /* Update using the positive Joseph form. */
-      KalmanGainType K = Sllt.solve(H * P);
+      KalmanGainType K = P * H.transpose() * Sinv;
       StateCovarianceType KH = StateCovarianceType::Identity() - K*H;
-      P = KH * P * KH.transpose() + K * R * K.transpose();
 
+      P = KH * P * KH.transpose() + K * R * K.transpose();
       x += K * residual;
 
       /* Numerical hack for long term stability. */
@@ -379,3 +345,5 @@ private:
 }
 
 #endif
+
+#include "adkalmanfilter/outlierrejection_impl.h"
