@@ -66,8 +66,7 @@ public:
    * Functor::InputType
    * Functor::ValueType
    *
-   * We use this to infere state size at compile time.
-   *
+   * We use this to infer state size at compile time.
    */
 
   typedef typename PredictionFunctor::InputType::Scalar Scalar;

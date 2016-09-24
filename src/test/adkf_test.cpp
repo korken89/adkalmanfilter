@@ -75,8 +75,10 @@ int main(int argc, char *argv[])
   ADKalmanFilter::ADKalmanFilter< predFunctor<float> > kf(in, Q);
 
   typedef typename ADKalmanFilter::ADKalmanFilter< predFunctor<float> >::StateType StateType;
+  typedef typename ADKalmanFilter::ADKalmanFilter< predFunctor<float> >::StateCovarianceType StateCovarianceType;
 
   StateType out;
+  StateCovarianceType P;
 
   kf.predict(Q, F, u);
   //kf.predict(Q, F);
@@ -90,7 +92,9 @@ int main(int argc, char *argv[])
     std::cout << "Measurement rejected!" << std::endl;
 
   kf.getState(out);
+  kf.getStateCovariance(P);
   std::cout << "x = " << std::endl << out << std::endl << std::endl;
+  std::cout << "P = " << std::endl << P << std::endl << std::endl;
 
   meas = MeasType::Random()*100;
   if(kf.update< measFunctor<float> >(meas, R, H))
@@ -99,7 +103,9 @@ int main(int argc, char *argv[])
     std::cout << "Measurement rejected!" << std::endl;
 
   kf.getState(out);
+  kf.getStateCovariance(P);
   std::cout << "x = " << std::endl << out << std::endl << std::endl;
+  std::cout << "P = " << std::endl << P << std::endl << std::endl;
 
   meas = MeasType::Random();
   if(kf.update< measFunctor<float> >(meas, R))
@@ -108,7 +114,9 @@ int main(int argc, char *argv[])
     std::cout << "Measurement rejected!" << std::endl;
 
   kf.getState(out);
+  kf.getStateCovariance(P);
   std::cout << "x = " << std::endl << out << std::endl << std::endl;
+  std::cout << "P = " << std::endl << P << std::endl << std::endl;
 
   meas = MeasType::Random()*100;
   if(kf.update< measFunctor<float> >(meas, R))
@@ -117,7 +125,19 @@ int main(int argc, char *argv[])
     std::cout << "Measurement rejected!" << std::endl;
 
   kf.getState(out);
+  kf.getStateCovariance(P);
   std::cout << "x = " << std::endl << out << std::endl << std::endl;
+  std::cout << "P = " << std::endl << P << std::endl << std::endl;
+
+  std::cout << "Running a lot of iterations.. " << std::endl << std::endl;
+  for (auto i = 0; i < 10000000; i++)
+  {
+    meas = MeasType::Random()*10;
+    kf.update< measFunctor<float> >(meas, R);
+  }
+  std::cout << "x = " << std::endl << out << std::endl << std::endl;
+  std::cout << "P = " << std::endl << P << std::endl << std::endl;
+
 
   return 0;
 }
