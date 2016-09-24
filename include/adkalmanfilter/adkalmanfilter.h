@@ -1,9 +1,7 @@
-#include <iostream>
 #include <Eigen/Dense>
-#include <unsupported/Eigen/AutoDiff>
 
-#ifndef _AD_KF
-#define _AD_KF
+#ifndef _AD_KF_H
+#define _AD_KF_H
 
 namespace ADKalmanFilter {
 
@@ -42,67 +40,43 @@ public:
   typedef Eigen::Matrix<Scalar,
                         StateType::RowsAtCompileTime,
                         StateType::RowsAtCompileTime>   PredictionJacobianType;
-  typedef Eigen::Matrix<Scalar, 1, 1>                   ArgDefaultType;
 
   /*
    *
    */
-  ADKalmanFilter()
-  {
-    initialized = false;
-  }
+  ADKalmanFilter();
 
   /*
    *
    */
   ADKalmanFilter(const Eigen::MatrixBase<StateType> &x_init,
-                 const Eigen::MatrixBase<StateCovarianceType> &P_init)
-  {
-    init(x_init, P_init);
-  }
+                 const Eigen::MatrixBase<StateCovarianceType> &P_init);
 
   /*
    *
    */
   void init(const Eigen::MatrixBase<StateType> &x_init,
-            const Eigen::MatrixBase<StateCovarianceType> &P_init)
-  {
-    x = x_init;
-    P = P_init;
-    initialized = true;
-  }
+            const Eigen::MatrixBase<StateCovarianceType> &P_init);
 
   /*
    *
    */
-  void getState(Eigen::MatrixBase<StateType> &x_out)
-  {
-    x_out = x;
-  }
+  void getState(Eigen::MatrixBase<StateType> &x_out);
 
   /*
    *
    */
-  void setState(const Eigen::MatrixBase<StateType> &x_in)
-  {
-    x = x_in;
-  }
+  void setState(const Eigen::MatrixBase<StateType> &x_in);
 
   /*
    *
    */
-  void getStateCovariance(Eigen::MatrixBase<StateCovarianceType> &P_out)
-  {
-    P_out = P;
-  }
+  void getStateCovariance(Eigen::MatrixBase<StateCovarianceType> &P_out);
 
   /*
    *
    */
-  void setStateCovariance(const Eigen::MatrixBase<StateCovarianceType> &P_in)
-  {
-    P = P_in;
-  }
+  void setStateCovariance(const Eigen::MatrixBase<StateCovarianceType> &P_in);
 
   /*
    *
@@ -110,67 +84,32 @@ public:
   template <typename ControlSignalType>
   void predict(const Eigen::MatrixBase<StateCovarianceType> &Q,
                const Eigen::MatrixBase<PredictionJacobianType> &F,
-               const Eigen::MatrixBase<ControlSignalType> &u)
-  {
-    StateType f;
-
-    PredictionFunctor()(x, &f, u);
-    applyPrediction(f, F, Q);
-  }
+               const Eigen::MatrixBase<ControlSignalType> &u);
 
   /*
    *
    */
   void predict(const Eigen::MatrixBase<StateCovarianceType> &Q,
-               const Eigen::MatrixBase<PredictionJacobianType> &F)
-  {
-    StateType f;
-
-    PredictionFunctor()(x, &f);
-    applyPrediction(f, F, Q);
-  }
+               const Eigen::MatrixBase<PredictionJacobianType> &F);
 
   /*
    *
    */
   template <typename ControlSignalType>
   void predict(const Eigen::MatrixBase<StateCovarianceType> &Q,
-               const Eigen::MatrixBase<ControlSignalType> &u)
-  {
-    StateType f;
-    PredictionJacobianType F;
-    Eigen::AutoDiffJacobian< PredictionFunctor > adjac;
-
-    adjac(x, &f, &F, u);
-    applyPrediction(f, F, Q);
-  }
+               const Eigen::MatrixBase<ControlSignalType> &u);
 
   /*
    *
    */
-  void predict(const Eigen::MatrixBase<StateCovarianceType> &Q)
-  {
-    StateType f;
-    PredictionJacobianType F;
-    Eigen::AutoDiffJacobian< PredictionFunctor > adjac;
-
-    adjac(x, &f, &F);
-    applyPrediction(f, F, Q);
-  }
+  void predict(const Eigen::MatrixBase<StateCovarianceType> &Q);
 
   /*
    *
    */
   void applyPrediction(const Eigen::MatrixBase<StateType> &f,
                        const Eigen::MatrixBase<PredictionJacobianType> &F,
-                       const Eigen::MatrixBase<StateCovarianceType> &Q)
-  {
-    if (!initialized)
-      return;
-
-    x += f;
-    P = F * P * F.transpose() + Q;
-  }
+                       const Eigen::MatrixBase<StateCovarianceType> &Q);
 
   /*
    *
@@ -179,42 +118,7 @@ public:
             typename MeasurementType,
             typename RType>
   bool update(const Eigen::MatrixBase<MeasurementType> &measurement,
-              const Eigen::MatrixBase<RType> &R)
-  {
-    /*
-     * Error checking.
-     */
-    EIGEN_STATIC_ASSERT(MeasurementFunctor::InputType::RowsAtCompileTime ==
-                        PredictionFunctor::InputType::RowsAtCompileTime,
-                        "MeasurementFunctor has wrong state size")
-
-    EIGEN_STATIC_ASSERT(MeasurementFunctor::ValueType::RowsAtCompileTime ==
-                        MeasurementType::RowsAtCompileTime,
-                        "MeasurementType has wrong size")
-
-    /*
-     * Definitions.
-     */
-    typedef Eigen::Matrix<Scalar,
-                          MeasurementFunctor::ValueType::RowsAtCompileTime,
-                          MeasurementFunctor::InputType::RowsAtCompileTime>
-                            HType;
-
-
-    /*
-     * Implementation.
-     */
-    Eigen::AutoDiffJacobian< MeasurementFunctor > adjac;
-    HType Had;
-    MeasurementType residual, h;
-
-    /* No input Jacobian was given, use Algorithmic Differentiation to
-     * calculate the Jacobian. */
-    adjac(x, &h, &Had);
-    residual = measurement - h;
-
-    return applyResidual<MeasurementFunctor>(residual, R, Had);
-  }
+              const Eigen::MatrixBase<RType> &R);
 
   /*
    *
@@ -225,29 +129,7 @@ public:
             typename HType>
   bool update(const Eigen::MatrixBase<MeasurementType> &measurement,
               const Eigen::MatrixBase<RType> &R,
-              const Eigen::MatrixBase<HType> &H)
-  {
-    /*
-     * Error checking.
-     */
-    EIGEN_STATIC_ASSERT(MeasurementFunctor::InputType::RowsAtCompileTime ==
-                        PredictionFunctor::InputType::RowsAtCompileTime,
-                        "MeasurementFunctor has wrong state size");
-
-    EIGEN_STATIC_ASSERT(MeasurementFunctor::ValueType::RowsAtCompileTime ==
-                        MeasurementType::RowsAtCompileTime,
-                        "MeasurementType has wrong size");
-
-    /*
-     * Implementation.
-     */
-    Eigen::AutoDiffJacobian< MeasurementFunctor > adjac;
-    MeasurementType residual, h;
-
-    MeasurementFunctor()(x, &h);
-    residual = measurement - h;
-    return applyResidual<MeasurementFunctor>(residual, R, H);
-  }
+              const Eigen::MatrixBase<HType> &H);
 
   /*
    *
@@ -258,66 +140,7 @@ public:
             typename HType>
   bool applyResidual(const Eigen::MatrixBase<MeasurementType> &residual,
                      const Eigen::MatrixBase<RType> &R,
-                     const Eigen::MatrixBase<HType> &H)
-  {
-    /*
-     * Error checking.
-     */
-    EIGEN_STATIC_ASSERT((std::is_same<Scalar,
-                        typename MeasurementFunctor::InputType::Scalar>::value),
-            "PredictionFunctor and MeasurementFunctor are of different types")
-
-    EIGEN_STATIC_ASSERT(RType::RowsAtCompileTime ==
-                        MeasurementType::RowsAtCompileTime &&
-                        RType::ColsAtCompileTime ==
-                        MeasurementType::RowsAtCompileTime,
-                        "RType has wrong size")
-
-    EIGEN_STATIC_ASSERT(int(HType::RowsAtCompileTime) ==
-                        int(MeasurementType::RowsAtCompileTime) &&
-                        int(HType::ColsAtCompileTime) ==
-                        int(StateType::RowsAtCompileTime),
-                        "HType has wrong size")
-
-    if (!initialized)
-      return false;
-
-    /*
-     * Definitions.
-     */
-    typedef Eigen::Matrix<Scalar,
-                          StateType::RowsAtCompileTime,
-                          MeasurementType::RowsAtCompileTime>
-                          KalmanGainType;
-
-    /*
-     * Implementation.
-     */
-
-    /* Form inverse of S for future use in the outlier rejection and
-     * in the Kalman Filter equations. */
-    RType Sinv = (H * P * H.transpose() + R).inverse();
-    /* Testing showed this to be faster than using Eigen::LLT
-     * TODO: Figure out why... */
-
-    /* Apply outlier rejection before we do all the heavy calculations. */
-    if (MeasurementFunctor().rejectMeasurement(Sinv, residual) == false)
-    {
-      /* Update using the positive Joseph form. */
-      KalmanGainType K = P * H.transpose() * Sinv;
-      StateCovarianceType KH = StateCovarianceType::Identity() - K*H;
-
-      P = KH * P * KH.transpose() + K * R * K.transpose();
-      x += K * residual;
-
-      /* Numerical hack for long term stability. */
-      P = Scalar(0.5) * (P + P.transpose());
-
-      return true;
-    }
-    else
-      return false;
-  }
+                     const Eigen::MatrixBase<HType> &H);
 
 private:
 
@@ -342,4 +165,5 @@ private:
 
 #endif
 
-#include "adkalmanfilter/outlierrejection_impl.h"
+#include "adkalmanfilter/implementation/outlierrejection_impl.h"
+#include "adkalmanfilter/implementation/adkalmanfilter_impl.h"

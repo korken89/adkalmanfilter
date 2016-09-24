@@ -129,17 +129,17 @@ int main(int argc, char *argv[])
   std::cout << "x = " << std::endl << out << std::endl << std::endl;
   std::cout << "P = " << std::endl << P << std::endl << std::endl;
 
-  std::cout << "Running a lot of iterations.. " << std::endl << std::endl;
+  std::cout << "Running a lot of iterations... " << std::endl << std::endl;
   for (auto i = 0; i < 100000000; i++)
   {
-    meas = MeasType::Random()*20;
+    meas = MeasType::Random();
     kf.update< measFunctor<float> >(meas, R);
   }
+
   kf.getState(out);
   kf.getStateCovariance(P);
   std::cout << "x = " << std::endl << out << std::endl << std::endl;
   std::cout << "P = " << std::endl << P << std::endl << std::endl;
-
 
   return 0;
 }

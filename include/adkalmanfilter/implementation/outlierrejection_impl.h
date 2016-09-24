@@ -1,5 +1,7 @@
-#ifndef _AD_KF_OUTLIER_REJECTION_IMPL
-#define _AD_KF_OUTLIER_REJECTION_IMPL
+#ifndef _AD_KF_OUTLIER_REJECTION_IMPL_H
+#define _AD_KF_OUTLIER_REJECTION_IMPL_H
+
+#include <Eigen/Dense>
 
 namespace ADKalmanFilter {
 
