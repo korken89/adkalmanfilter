@@ -75,7 +75,7 @@ public:
   /*
    *
    */
-  EIGEN_STRONG_INLINE void getState(Eigen::MatrixBase<StateType> &x_out)
+  void getState(Eigen::MatrixBase<StateType> &x_out)
   {
     x_out = x;
   }
@@ -83,7 +83,7 @@ public:
   /*
    *
    */
-  EIGEN_STRONG_INLINE void setState(const Eigen::MatrixBase<StateType> &x_in)
+  void setState(const Eigen::MatrixBase<StateType> &x_in)
   {
     x = x_in;
   }
@@ -91,8 +91,7 @@ public:
   /*
    *
    */
-  EIGEN_STRONG_INLINE
-    void getStateCovariance(Eigen::MatrixBase<StateCovarianceType> &P_out)
+  void getStateCovariance(Eigen::MatrixBase<StateCovarianceType> &P_out)
   {
     P_out = P;
   }
@@ -100,8 +99,7 @@ public:
   /*
    *
    */
-  EIGEN_STRONG_INLINE
-    void setStateCovariance(const Eigen::MatrixBase<StateCovarianceType> &P_in)
+  void setStateCovariance(const Eigen::MatrixBase<StateCovarianceType> &P_in)
   {
     P = P_in;
   }
@@ -163,10 +161,9 @@ public:
   /*
    *
    */
-  EIGEN_STRONG_INLINE
-    void applyPrediction(const Eigen::MatrixBase<StateType> &f,
-                         const Eigen::MatrixBase<PredictionJacobianType> &F,
-                         const Eigen::MatrixBase<StateCovarianceType> &Q)
+  void applyPrediction(const Eigen::MatrixBase<StateType> &f,
+                       const Eigen::MatrixBase<PredictionJacobianType> &F,
+                       const Eigen::MatrixBase<StateCovarianceType> &Q)
   {
     if (!initialized)
       return;
@@ -181,9 +178,8 @@ public:
   template <typename MeasurementFunctor,
             typename MeasurementType,
             typename RType>
-  EIGEN_STRONG_INLINE
-    bool update(const Eigen::MatrixBase<MeasurementType> &measurement,
-                const Eigen::MatrixBase<RType> &R)
+  bool update(const Eigen::MatrixBase<MeasurementType> &measurement,
+              const Eigen::MatrixBase<RType> &R)
   {
     /*
      * Error checking.
@@ -216,6 +212,7 @@ public:
      * calculate the Jacobian. */
     adjac(x, &h, &Had);
     residual = measurement - h;
+
     return applyResidual<MeasurementFunctor>(residual, R, Had);
   }
 
@@ -226,10 +223,9 @@ public:
             typename MeasurementType,
             typename RType,
             typename HType>
-  EIGEN_STRONG_INLINE bool update(
-                        const Eigen::MatrixBase<MeasurementType> &measurement,
-                        const Eigen::MatrixBase<RType> &R,
-                        const Eigen::MatrixBase<HType> &H)
+  bool update(const Eigen::MatrixBase<MeasurementType> &measurement,
+              const Eigen::MatrixBase<RType> &R,
+              const Eigen::MatrixBase<HType> &H)
   {
     /*
      * Error checking.
@@ -297,12 +293,12 @@ public:
     /*
      * Implementation.
      */
-    RType Sinv;
 
     /* Form inverse of S for future use in the outlier rejection and
      * in the Kalman Filter equations. */
-    Sinv = (H * P * H.transpose() + R).inverse();
-    /* Testing showed this to be faster than using Eigen::LLT. */
+    RType Sinv = (H * P * H.transpose() + R).inverse();
+    /* Testing showed this to be faster than using Eigen::LLT
+     * TODO: Figure out why... */
 
     /* Apply outlier rejection before we do all the heavy calculations. */
     if (MeasurementFunctor().rejectMeasurement(Sinv, residual) == false)
