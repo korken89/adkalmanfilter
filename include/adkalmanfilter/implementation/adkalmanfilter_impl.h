@@ -162,7 +162,7 @@ void ADKalmanFilter<PredictionFunctor>::applyPrediction(
   if (!initialized)
     return;
 
-  x += f;
+  x = f;
   P = F * P * F.transpose() + Q;
 }
 
