@@ -8,6 +8,21 @@ namespace ADKalmanFilter {
 /*
  *
  */
+template <typename Scalar, int N, int M=N>
+struct baseFunctor
+{
+  /*
+   * Definitions required for input and output type.
+   * Used by the AutoDiff to find Jacobians.
+   */
+  typedef Eigen::Matrix<Scalar, N, 1> InputType;
+  typedef Eigen::Matrix<Scalar, M, 1> ValueType;
+};
+
+
+/*
+ *
+ */
 template <typename PredictionFunctor>
 class ADKalmanFilter
 {
@@ -24,7 +39,7 @@ public:
             "The PredictionFunctor's input and output must have the same size")
 
   /*
-   * All functors must have the following defined types:
+   * All functors have the following defined types:
    *
    * Functor::InputType
    * Functor::ValueType

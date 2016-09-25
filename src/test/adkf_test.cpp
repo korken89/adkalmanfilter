@@ -4,16 +4,10 @@
 
 using namespace std;
 
-template <typename Scalar>
-struct predFunctor
-{
-  /*
-   * Definitions required for input and output type.
-   * Used by the AutoDiff to find Jacobians.
-   */
-  typedef Eigen::Matrix<Scalar, 2, 1> InputType;
-  typedef InputType ValueType; /* In the prediction input size = output size. */
 
+template <typename Scalar>
+struct predFunctor : public ADKalmanFilter::baseFunctor<Scalar, 2>
+{
   /*
    * Implementation starts here.
    */
@@ -29,15 +23,9 @@ struct predFunctor
 };
 
 template <typename Scalar>
-struct measFunctor : public ADKalmanFilter::MahalanobisOutlierRejection<10>
+struct measFunctor : public ADKalmanFilter::baseFunctor<Scalar, 2, 1>,
+                     public ADKalmanFilter::MahalanobisOutlierRejection<10>
 {
-  /*
-   * Definitions required for input and output type.
-   * Used by the AutoDiff to find Jacobians.
-   */
-  typedef Eigen::Matrix<Scalar, 2, 1> InputType;
-  typedef Eigen::Matrix<Scalar, 1, 1> ValueType;
-
   /*
    * Implementation starts here.
    */
