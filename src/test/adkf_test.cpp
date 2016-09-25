@@ -23,8 +23,8 @@ struct predFunctor
     /* Implementation... */
     T2 &o = *output;
 
-    o(0) = input(0) + input(1);
-    o(1) = input(1) + controlSignal(0);
+    o(0) = input(0) + 1e-2*input(1);
+    o(1) = controlSignal(0);
   }
 };
 
@@ -47,7 +47,7 @@ struct measFunctor : public ADKalmanFilter::MahalanobisOutlierRejection<10>
     /* Implementation... */
     T2 &o = *output;
 
-    o(0) = input(0) + input(1);
+    o(0) = input(0);
   }
 };
 
@@ -67,7 +67,7 @@ int main(int argc, char *argv[])
   MeasType meas;
   RType R = RType::Identity();
   QType Q = QType::Identity();
-  HType H = HType::Ones();
+  HType H = HType::Identity();
   FType F = FType::Ones();
   F(1,0) = 0;
   in.setZero();
@@ -80,59 +80,22 @@ int main(int argc, char *argv[])
   StateType out;
   StateCovarianceType P;
 
-  kf.predict(Q, F, u);
-  //kf.predict(Q, F);
-  kf.predict(Q, u);
+  kf.predict(F, u, Q);
+  //kf.predict(F, Q);
+  kf.predict(u, Q);
   //kf.predict(Q);
 
-  meas = MeasType::Random();
-  if(kf.update< measFunctor<float> >(meas, R, H))
-    std::cout << "Measurement accepted!" << std::endl;
-  else
-    std::cout << "Measurement rejected!" << std::endl;
-
   kf.getState(out);
   kf.getStateCovariance(P);
   std::cout << "x = " << std::endl << out << std::endl << std::endl;
-  std::cout << "P = " << std::endl << P << std::endl << std::endl;
-
-  meas = MeasType::Random()*100;
-  if(kf.update< measFunctor<float> >(meas, R, H))
-    std::cout << "Measurement accepted!" << std::endl;
-  else
-    std::cout << "Measurement rejected!" << std::endl;
-
-  kf.getState(out);
-  kf.getStateCovariance(P);
-  std::cout << "x = " << std::endl << out << std::endl << std::endl;
-  std::cout << "P = " << std::endl << P << std::endl << std::endl;
-
-  meas = MeasType::Random();
-  if(kf.update< measFunctor<float> >(meas, R))
-    std::cout << "Measurement accepted!" << std::endl;
-  else
-    std::cout << "Measurement rejected!" << std::endl;
-
-  kf.getState(out);
-  kf.getStateCovariance(P);
-  std::cout << "x = " << std::endl << out << std::endl << std::endl;
-  std::cout << "P = " << std::endl << P << std::endl << std::endl;
-
-  meas = MeasType::Random()*100;
-  if(kf.update< measFunctor<float> >(meas, R))
-    std::cout << "Measurement accepted!" << std::endl;
-  else
-    std::cout << "Measurement rejected!" << std::endl;
-
-  kf.getState(out);
-  kf.getStateCovariance(P);
-  std::cout << "x = " << std::endl << out << std::endl << std::endl;
+  std::cout << "u = " << std::endl << u << std::endl << std::endl;
   std::cout << "P = " << std::endl << P << std::endl << std::endl;
 
   std::cout << "Running a lot of iterations... " << std::endl << std::endl;
-  for (auto i = 0; i < 100000000; i++)
+  for (auto i = 0; i < 100; i++)
   {
     meas = MeasType::Random();
+    kf.predict(u, Q);
     kf.update< measFunctor<float> >(meas, R);
   }
 

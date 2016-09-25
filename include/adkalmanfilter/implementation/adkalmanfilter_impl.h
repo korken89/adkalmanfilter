@@ -83,11 +83,20 @@ void ADKalmanFilter<PredictionFunctor>::setStateCovariance(
  *
  */
 template <typename PredictionFunctor>
+bool ADKalmanFilter<PredictionFunctor>::isInitialized() const
+{
+  return initialized;
+}
+
+/*
+ *
+ */
+template <typename PredictionFunctor>
 template <typename ControlSignalType>
 void ADKalmanFilter<PredictionFunctor>::predict(
-              const Eigen::MatrixBase<StateCovarianceType> &Q,
               const Eigen::MatrixBase<PredictionJacobianType> &F,
-              const Eigen::MatrixBase<ControlSignalType> &u)
+              const Eigen::MatrixBase<ControlSignalType> &u,
+              const Eigen::MatrixBase<StateCovarianceType> &Q)
 {
   StateType f;
 
@@ -100,8 +109,8 @@ void ADKalmanFilter<PredictionFunctor>::predict(
  */
 template <typename PredictionFunctor>
 void ADKalmanFilter<PredictionFunctor>::predict(
-              const Eigen::MatrixBase<StateCovarianceType> &Q,
-              const Eigen::MatrixBase<PredictionJacobianType> &F)
+              const Eigen::MatrixBase<PredictionJacobianType> &F,
+              const Eigen::MatrixBase<StateCovarianceType> &Q)
 {
   StateType f;
 
@@ -115,8 +124,8 @@ void ADKalmanFilter<PredictionFunctor>::predict(
 template <typename PredictionFunctor>
 template <typename ControlSignalType>
 void ADKalmanFilter<PredictionFunctor>::predict(
-              const Eigen::MatrixBase<StateCovarianceType> &Q,
-              const Eigen::MatrixBase<ControlSignalType> &u)
+              const Eigen::MatrixBase<ControlSignalType> &u,
+              const Eigen::MatrixBase<StateCovarianceType> &Q)
 {
   StateType f;
   PredictionJacobianType F;

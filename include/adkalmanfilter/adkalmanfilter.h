@@ -79,25 +79,32 @@ public:
   /*
    *
    */
-  template <typename ControlSignalType>
-
-  void predict(const Eigen::MatrixBase<StateCovarianceType> &Q,
-               const Eigen::MatrixBase<PredictionJacobianType> &F,
-               const Eigen::MatrixBase<ControlSignalType> &u);
-
-  /*
-   *
-   */
-  void predict(const Eigen::MatrixBase<StateCovarianceType> &Q,
-               const Eigen::MatrixBase<PredictionJacobianType> &F);
+  bool isInitialized() const;
 
   /*
    *
    */
   template <typename ControlSignalType>
 
-  void predict(const Eigen::MatrixBase<StateCovarianceType> &Q,
-               const Eigen::MatrixBase<ControlSignalType> &u);
+  void predict(const Eigen::MatrixBase<PredictionJacobianType> &F,
+               const Eigen::MatrixBase<ControlSignalType> &u,
+               const Eigen::MatrixBase<StateCovarianceType> &Q);
+
+  /*
+   *
+   */
+  void predict(const Eigen::MatrixBase<PredictionJacobianType> &F,
+               const Eigen::MatrixBase<StateCovarianceType> &Q);
+
+
+  /*
+   *
+   */
+  template <typename ControlSignalType>
+
+  void predict(const Eigen::MatrixBase<ControlSignalType> &u,
+               const Eigen::MatrixBase<StateCovarianceType> &Q);
+
 
   /*
    *
