@@ -80,7 +80,7 @@ int main(int argc, char *argv[])
   std::cout << "P = " << std::endl << P << std::endl << std::endl;
 
   std::cout << "Running a lot of iterations... " << std::endl << std::endl;
-  for (auto i = 0; i < 100; i++)
+  for (auto i = 0; i < 100000000; i++)
   {
     meas = MeasType::Random();
     kf.predict(u, Q);
