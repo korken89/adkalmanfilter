@@ -32,14 +32,12 @@ public:
    * We use this to infer state size at compile time.
    */
 
-  typedef typename PredictionFunctor::InputType::Scalar Scalar;
-  typedef typename PredictionFunctor::InputType         StateType;
+  typedef typename PredictionFunctor::InputType::Scalar  Scalar;
+  typedef typename PredictionFunctor::InputType          StateType;
   typedef Eigen::Matrix<Scalar,
                         StateType::RowsAtCompileTime,
-                        StateType::RowsAtCompileTime>   StateCovarianceType;
-  typedef Eigen::Matrix<Scalar,
-                        StateType::RowsAtCompileTime,
-                        StateType::RowsAtCompileTime>   PredictionJacobianType;
+                        StateType::RowsAtCompileTime>    StateCovarianceType;
+  typedef StateCovarianceType                            PredictionJacobianType;
 
   /*
    *
@@ -82,6 +80,7 @@ public:
    *
    */
   template <typename ControlSignalType>
+
   void predict(const Eigen::MatrixBase<StateCovarianceType> &Q,
                const Eigen::MatrixBase<PredictionJacobianType> &F,
                const Eigen::MatrixBase<ControlSignalType> &u);
@@ -96,6 +95,7 @@ public:
    *
    */
   template <typename ControlSignalType>
+
   void predict(const Eigen::MatrixBase<StateCovarianceType> &Q,
                const Eigen::MatrixBase<ControlSignalType> &u);
 
@@ -117,6 +117,7 @@ public:
   template <typename MeasurementFunctor,
             typename MeasurementType,
             typename RType>
+
   bool update(const Eigen::MatrixBase<MeasurementType> &measurement,
               const Eigen::MatrixBase<RType> &R);
 
@@ -127,6 +128,7 @@ public:
             typename MeasurementType,
             typename RType,
             typename HType>
+
   bool update(const Eigen::MatrixBase<MeasurementType> &measurement,
               const Eigen::MatrixBase<RType> &R,
               const Eigen::MatrixBase<HType> &H);
@@ -138,6 +140,7 @@ public:
             typename MeasurementType,
             typename RType,
             typename HType>
+
   bool applyResidual(const Eigen::MatrixBase<MeasurementType> &residual,
                      const Eigen::MatrixBase<RType> &R,
                      const Eigen::MatrixBase<HType> &H);

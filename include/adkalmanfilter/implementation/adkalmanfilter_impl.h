@@ -35,7 +35,7 @@ void ADKalmanFilter<PredictionFunctor>::init(
               const Eigen::MatrixBase<StateCovarianceType> &P_init)
 {
   x = x_init;
-  P = P_init;
+  P = P_init.template selfadjointView< Eigen::Upper >();
   initialized = true;
 }
 
@@ -76,7 +76,7 @@ template <typename PredictionFunctor>
 void ADKalmanFilter<PredictionFunctor>::setStateCovariance(
               const Eigen::MatrixBase<StateCovarianceType> &P_in)
 {
-  P = P_in;
+  P = P_in.template selfadjointView< Eigen::Upper >();
 }
 
 /*
@@ -171,12 +171,12 @@ bool ADKalmanFilter<PredictionFunctor>::update(
   /*
    * Error checking.
    */
-  EIGEN_STATIC_ASSERT(MeasurementFunctor::InputType::RowsAtCompileTime ==
-                      PredictionFunctor::InputType::RowsAtCompileTime,
+  EIGEN_STATIC_ASSERT(int(MeasurementFunctor::InputType::RowsAtCompileTime) ==
+                      int(PredictionFunctor::InputType::RowsAtCompileTime),
                       "MeasurementFunctor has wrong state size")
 
-  EIGEN_STATIC_ASSERT(MeasurementFunctor::ValueType::RowsAtCompileTime ==
-                      MeasurementType::RowsAtCompileTime,
+  EIGEN_STATIC_ASSERT(int(MeasurementFunctor::ValueType::RowsAtCompileTime) ==
+                      int(MeasurementType::RowsAtCompileTime),
                       "MeasurementType has wrong size")
 
   /*
@@ -219,12 +219,12 @@ bool ADKalmanFilter<PredictionFunctor>::update(
   /*
    * Error checking.
    */
-  EIGEN_STATIC_ASSERT(MeasurementFunctor::InputType::RowsAtCompileTime ==
-                      PredictionFunctor::InputType::RowsAtCompileTime,
+  EIGEN_STATIC_ASSERT(int(MeasurementFunctor::InputType::RowsAtCompileTime) ==
+                      int(PredictionFunctor::InputType::RowsAtCompileTime),
                       "MeasurementFunctor has wrong state size");
 
-  EIGEN_STATIC_ASSERT(MeasurementFunctor::ValueType::RowsAtCompileTime ==
-                      MeasurementType::RowsAtCompileTime,
+  EIGEN_STATIC_ASSERT(int(MeasurementFunctor::ValueType::RowsAtCompileTime) ==
+                      int(MeasurementType::RowsAtCompileTime),
                       "MeasurementType has wrong size");
 
   /*
@@ -256,12 +256,12 @@ bool ADKalmanFilter<PredictionFunctor>::applyResidual(
    */
   EIGEN_STATIC_ASSERT((std::is_same<Scalar,
                       typename MeasurementFunctor::InputType::Scalar>::value),
-          "PredictionFunctor and MeasurementFunctor are of different types")
+      "PredictionFunctor and MeasurementFunctor are of different Scalar types")
 
-  EIGEN_STATIC_ASSERT(RType::RowsAtCompileTime ==
-                      MeasurementType::RowsAtCompileTime &&
-                      RType::ColsAtCompileTime ==
-                      MeasurementType::RowsAtCompileTime,
+  EIGEN_STATIC_ASSERT(int(RType::RowsAtCompileTime) ==
+                      int(MeasurementType::RowsAtCompileTime) &&
+                      int(RType::ColsAtCompileTime) ==
+                      int(MeasurementType::RowsAtCompileTime),
                       "RType has wrong size")
 
   EIGEN_STATIC_ASSERT(int(HType::RowsAtCompileTime) ==
