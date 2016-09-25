@@ -98,6 +98,8 @@ void ADKalmanFilter<PredictionFunctor>::predict(
               const Eigen::MatrixBase<ControlSignalType> &u,
               const Eigen::MatrixBase<StateCovarianceType> &Q)
 {
+  eigen_assert(initialized == true);
+
   StateType f;
 
   PredictionFunctor()(x, &f, u);
@@ -112,6 +114,8 @@ void ADKalmanFilter<PredictionFunctor>::predict(
               const Eigen::MatrixBase<PredictionJacobianType> &F,
               const Eigen::MatrixBase<StateCovarianceType> &Q)
 {
+  eigen_assert(initialized == true);
+
   StateType f;
 
   PredictionFunctor()(x, &f);
@@ -127,6 +131,8 @@ void ADKalmanFilter<PredictionFunctor>::predict(
               const Eigen::MatrixBase<ControlSignalType> &u,
               const Eigen::MatrixBase<StateCovarianceType> &Q)
 {
+  eigen_assert(initialized == true);
+
   StateType f;
   PredictionJacobianType F;
   Eigen::AutoDiffJacobian< PredictionFunctor > adjac;
@@ -142,6 +148,8 @@ template <typename PredictionFunctor>
 void ADKalmanFilter<PredictionFunctor>::predict(
               const Eigen::MatrixBase<StateCovarianceType> &Q)
 {
+  eigen_assert(initialized == true);
+
   StateType f;
   PredictionJacobianType F;
   Eigen::AutoDiffJacobian< PredictionFunctor > adjac;
@@ -159,9 +167,6 @@ void ADKalmanFilter<PredictionFunctor>::applyPrediction(
               const Eigen::MatrixBase<PredictionJacobianType> &F,
               const Eigen::MatrixBase<StateCovarianceType> &Q)
 {
-  if (!initialized)
-    return;
-
   x = f;
   P = F * P * F.transpose() + Q;
 }
@@ -200,6 +205,8 @@ bool ADKalmanFilter<PredictionFunctor>::update(
   /*
    * Implementation.
    */
+  eigen_assert(initialized == true);
+
   Eigen::AutoDiffJacobian< MeasurementFunctor > adjac;
   HType Had;
   MeasurementType residual, h;
@@ -239,6 +246,8 @@ bool ADKalmanFilter<PredictionFunctor>::update(
   /*
    * Implementation.
    */
+  eigen_assert(initialized == true);
+
   Eigen::AutoDiffJacobian< MeasurementFunctor > adjac;
   MeasurementType residual, h;
 
@@ -278,9 +287,6 @@ bool ADKalmanFilter<PredictionFunctor>::applyResidual(
                       int(HType::ColsAtCompileTime) ==
                       int(StateType::RowsAtCompileTime),
                       "HType has wrong size")
-
-  if (!initialized)
-    return false;
 
   /*
    * Definitions.
