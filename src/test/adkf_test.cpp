@@ -24,7 +24,7 @@ struct predFunctor : public ADKalmanFilter::BaseFunctor<Scalar, 2>
 
 template <typename Scalar>
 struct measFunctor : public ADKalmanFilter::BaseFunctor<Scalar, 2, 1>,
-                     public ADKalmanFilter::MahalanobisOutlierRejection<10>
+                     public ADKalmanFilter::MahalanobisOutlierRejection<50>
 {
   /*
    * Implementation starts here.
