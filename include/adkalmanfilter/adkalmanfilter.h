@@ -152,25 +152,25 @@ public:
    *
    */
   template <typename MeasurementFunctor,
+            typename HType,
             typename MeasurementType,
-            typename RType,
-            typename HType>
+            typename RType>
 
-  bool update(const Eigen::MatrixBase<MeasurementType> &measurement,
-              const Eigen::MatrixBase<RType> &R,
-              const Eigen::MatrixBase<HType> &H);
+  bool update(const Eigen::MatrixBase<HType> &H,
+              const Eigen::MatrixBase<MeasurementType> &measurement,
+              const Eigen::MatrixBase<RType> &R);
 
   /*
    *
    */
   template <typename MeasurementFunctor,
+            typename HType,
             typename MeasurementType,
-            typename RType,
-            typename HType>
+            typename RType>
 
-  bool applyResidual(const Eigen::MatrixBase<MeasurementType> &residual,
-                     const Eigen::MatrixBase<RType> &R,
-                     const Eigen::MatrixBase<HType> &H);
+  bool applyResidual(const Eigen::MatrixBase<HType> &H,
+                     const Eigen::MatrixBase<MeasurementType> &residual,
+                     const Eigen::MatrixBase<RType> &R);
 
 private:
 

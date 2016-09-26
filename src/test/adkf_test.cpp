@@ -52,7 +52,7 @@ int main(int argc, char *argv[])
 
   InputType in = InputType::Zero();
   InputType u = InputType::Zero();
-  MeasType meas;
+  MeasType meas = MeasType::Random();
   RType R = RType::Identity();
   QType Q = QType::Identity();
   HType H = HType::Identity();
@@ -72,6 +72,7 @@ int main(int argc, char *argv[])
   //kf.predict(F, Q);
   kf.predict(u, Q);
   //kf.predict(Q);
+  kf.update< measFunctor<float> >(H, meas, R);
 
   kf.getState(out);
   kf.getStateCovariance(P);

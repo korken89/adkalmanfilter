@@ -216,7 +216,7 @@ bool ADKalmanFilter<PredictionFunctor>::update(
   adjac(x, &h, &Had);
   residual = measurement - h;
 
-  return applyResidual<MeasurementFunctor>(residual, R, Had);
+  return applyResidual<MeasurementFunctor>(Had, residual, R);
 }
 
 /*
@@ -224,13 +224,14 @@ bool ADKalmanFilter<PredictionFunctor>::update(
  */
 template <typename PredictionFunctor>
 template <typename MeasurementFunctor,
+          typename HType,
           typename MeasurementType,
-          typename RType,
-          typename HType>
+          typename RType>
+
 bool ADKalmanFilter<PredictionFunctor>::update(
+              const Eigen::MatrixBase<HType> &H,
               const Eigen::MatrixBase<MeasurementType> &measurement,
-              const Eigen::MatrixBase<RType> &R,
-              const Eigen::MatrixBase<HType> &H)
+              const Eigen::MatrixBase<RType> &R)
 {
   /*
    * Error checking.
@@ -253,7 +254,7 @@ bool ADKalmanFilter<PredictionFunctor>::update(
 
   MeasurementFunctor()(x, &h);
   residual = measurement - h;
-  return applyResidual<MeasurementFunctor>(residual, R, H);
+  return applyResidual<MeasurementFunctor>(H, residual, R);
 }
 
 /*
@@ -261,13 +262,14 @@ bool ADKalmanFilter<PredictionFunctor>::update(
  */
 template <typename PredictionFunctor>
 template <typename MeasurementFunctor,
+          typename HType,
           typename MeasurementType,
-          typename RType,
-          typename HType>
+          typename RType>
+
 bool ADKalmanFilter<PredictionFunctor>::applyResidual(
+              const Eigen::MatrixBase<HType> &H,
               const Eigen::MatrixBase<MeasurementType> &residual,
-              const Eigen::MatrixBase<RType> &R,
-              const Eigen::MatrixBase<HType> &H)
+              const Eigen::MatrixBase<RType> &R)
 {
   /*
    * Error checking.
