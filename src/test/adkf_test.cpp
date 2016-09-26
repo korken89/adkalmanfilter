@@ -6,7 +6,7 @@ using namespace std;
 
 
 template <typename Scalar>
-struct predFunctor : public ADKalmanFilter::baseFunctor<Scalar, 2>
+struct predFunctor : public ADKalmanFilter::BaseFunctor<Scalar, 2>
 {
   /*
    * Implementation starts here.
@@ -23,7 +23,7 @@ struct predFunctor : public ADKalmanFilter::baseFunctor<Scalar, 2>
 };
 
 template <typename Scalar>
-struct measFunctor : public ADKalmanFilter::baseFunctor<Scalar, 2, 1>,
+struct measFunctor : public ADKalmanFilter::BaseFunctor<Scalar, 2, 1>,
                      public ADKalmanFilter::MahalanobisOutlierRejection<10>
 {
   /*
