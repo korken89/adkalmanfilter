@@ -87,7 +87,7 @@ int main(int argc, char *argv[])
   std::cout << "P = " << std::endl << P << std::endl << std::endl;
 
   std::cout << "Running a lot of iterations... " << std::endl << std::endl;
-  for (auto i = 0; i < 1e8; i++)
+  for (auto i = 0; i < 1e5; i++)
   {
     meas = MeasType::Random();
     kf.predictAD(Q, u, dt);
