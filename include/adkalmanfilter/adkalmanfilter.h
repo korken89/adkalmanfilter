@@ -3,11 +3,6 @@
 #ifndef _AD_KF_H
 #define _AD_KF_H
 
-/* Warn users, just in case. */
-#ifndef NDEBUG
-  #warning "Compiling in Debug mode, all Eigen operations will be very slow"
-#endif
-
 namespace ADKalmanFilter {
 
 /**
