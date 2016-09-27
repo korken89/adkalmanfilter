@@ -15,7 +15,7 @@ namespace ADKalmanFilter {
  *          to define required types for the AutoDiff module.
  *
  * @tparam    Scalar  Scalar of the code, can be float or double.
- * @tparam    N       Number of rows in the input vector.
+ * @tparam    N       Number of rows in the input vector (state vector).
  * @tparam    M       Number of rows in the output vector. Defaults to N.
  */
 template <typename Scalar, int N, int M=N>
@@ -25,9 +25,27 @@ struct BaseFunctor
    * Definitions required for input and output type.
    * Used by the AutoDiff to find Jacobians and ADKalmanFilter to infer sizes.
    */
+
+  /**
+   * @typedef   Definition of the input type, will be the state vector size.
+   */
   typedef Eigen::Matrix<Scalar, N, 1> InputType;
+
+  /**
+   * @typedef   Definition of the value (output) type. It will be the state
+   *            vector in the prediction Functor and the measurement size in
+   *            the measurement Functor.
+   */
   typedef Eigen::Matrix<Scalar, M, 1> ValueType;
+
+  /**
+   * @typedef   Definition of the Jacobian, is a helper type.
+   */
   typedef Eigen::Matrix<Scalar, M, N> JacobianType;
+
+  /**
+   * @typedef   Definition of the covariance, is a helper type.
+   */
   typedef Eigen::Matrix<Scalar, M, M> CovarianceType;
 };
 
