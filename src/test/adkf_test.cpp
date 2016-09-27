@@ -4,20 +4,23 @@
 
 using namespace std;
 
-
 template <typename Scalar>
 struct predFunctor : public ADKalmanFilter::BaseFunctor<Scalar, 2>
 {
+  typedef Eigen::Matrix<Scalar, 1, 1> ControlType;
+
   /*
    * Implementation starts here.
    */
-  template <typename T1, typename T2, typename T3>
-  void operator() (const T1 &input, T2 *output, const T3 &controlSignal) const
+  template <typename T1, typename T2>
+  void operator() (const T1 &input, T2 *output,
+                   const Eigen::Ref<const ControlType> &controlSignal,
+                   const Scalar &dt) const
   {
     /* Implementation... */
     T2 &o = *output;
 
-    o(0) = input(0) + 1e-2*input(1);
+    o(0) = input(0) + dt*input(1);
     o(1) = controlSignal(0);
   }
 };
@@ -41,7 +44,8 @@ struct measFunctor : public ADKalmanFilter::BaseFunctor<Scalar, 2, 1>,
 
 int main(int argc, char *argv[])
 {
-  typedef Eigen::Matrix<float, 2, 1> InputType;
+  typedef Eigen::Matrix<float, 2, 1> StateType;
+  typedef Eigen::Matrix<float, 1, 1> ContType;
   typedef Eigen::Matrix<float, 1, 1> MeasType;
   typedef Eigen::Matrix<float, 1, 1> RType;
   typedef Eigen::Matrix<float, 2, 2> QType;
@@ -50,8 +54,10 @@ int main(int argc, char *argv[])
 
   std::srand((unsigned int) time(0));
 
-  InputType in = InputType::Zero();
-  InputType u = InputType::Zero();
+  double dt = 1e-2;
+
+  StateType in = StateType::Zero();
+  ContType u = ContType::Zero();
   MeasType meas = MeasType::Random();
   RType R = RType::Identity();
   QType Q = QType::Identity();
@@ -68,9 +74,9 @@ int main(int argc, char *argv[])
   StateType out;
   StateCovarianceType P;
 
-  kf.predict(F, u, Q);
+  kf.predict(F, Q, u, dt);
   //kf.predict(F, Q);
-  kf.predict(u, Q);
+  kf.predictAD(Q, u, dt);
   //kf.predict(Q);
   kf.update< measFunctor<float> >(H, meas, R);
 
@@ -81,11 +87,11 @@ int main(int argc, char *argv[])
   std::cout << "P = " << std::endl << P << std::endl << std::endl;
 
   std::cout << "Running a lot of iterations... " << std::endl << std::endl;
-  for (auto i = 0; i < 100000000; i++)
+  for (auto i = 0; i < 1e8; i++)
   {
     meas = MeasType::Random();
-    kf.predict(u, Q);
-    kf.update< measFunctor<float> >(meas, R);
+    kf.predictAD(Q, u, dt);
+    kf.updateAD< measFunctor<float> >(meas, R);
   }
 
   kf.getState(out);

@@ -27,6 +27,8 @@ struct BaseFunctor
    */
   typedef Eigen::Matrix<Scalar, N, 1> InputType;
   typedef Eigen::Matrix<Scalar, M, 1> ValueType;
+  typedef Eigen::Matrix<Scalar, M, N> JacobianType;
+  typedef Eigen::Matrix<Scalar, M, M> CovarianceType;
 };
 
 
@@ -70,8 +72,10 @@ public:
   /*
    * All functors have the following defined types defined in BaseFunctor:
    *
-   * Functor::InputType = Input type
-   * Functor::ValueType = Output type
+   * Functor::InputType
+   * Functor::ValueType
+   * Functor::JacobianType
+   * Functor::Covariance
    *
    * We use this to infer state size at compile time.
    */
@@ -80,26 +84,24 @@ public:
    * @typedef   Defines the scalar type of the filter from the prediction
    *            Functor's type. The measurement Functor must use this type.
    */
-  typedef typename PredictionFunctor::InputType::Scalar  Scalar;
+  typedef typename PredictionFunctor::InputType::Scalar Scalar;
 
   /**
    * @typedef   Defines the state type from the prediction Functor. The
    *            measurement Functor's input type must be the same.
    */
-  typedef typename PredictionFunctor::InputType          StateType;
+  typedef typename PredictionFunctor::InputType StateType;
 
   /**
    * @typedef   Uses the state type to infer the size of the state covariance.
    */
-  typedef Eigen::Matrix<Scalar,
-                        StateType::RowsAtCompileTime,
-                        StateType::RowsAtCompileTime>    StateCovarianceType;
+  typedef typename PredictionFunctor::CovarianceType StateCovarianceType;
 
   /**
    * @typedef   Uses the state covariance type to infer the size of the
    *            prediction Jacobian.
    */
-  typedef StateCovarianceType                            PredictionJacobianType;
+  typedef typename PredictionFunctor::JacobianType PredictionJacobianType;
 
   /**
    * @brief Default constructor.
@@ -109,48 +111,68 @@ public:
   /**
    * @brief 	Default constructor which initializes the filter.
    *
+   * @tparam xType      State type.
+   * @tparam PType      State Covariance type.
+   *
    * @param[in] x_init	Starting value for the state.
    * @param[in] P_init  Starting value for the covariance.
    */
-  ADKalmanFilter(const Eigen::MatrixBase<StateType> &x_init,
-                 const Eigen::MatrixBase<StateCovarianceType> &P_init);
+  template <typename xType, typename PType>
+  ADKalmanFilter(const Eigen::MatrixBase<xType> &x_init,
+                 const Eigen::MatrixBase<PType> &P_init);
 
   /**
    * @brief 	Initializes or reinitializes the filter.
    *
+   * @tparam xType      State type.
+   * @tparam PType      State Covariance type.
+   *
    * @param[in] x_init  Starting value for the state.
    * @param[in] P_init  Starting value for the covariance.
    */
-  void init(const Eigen::MatrixBase<StateType> &x_init,
-            const Eigen::MatrixBase<StateCovarianceType> &P_init);
+  template <typename xType, typename PType>
+  void init(const Eigen::MatrixBase<xType> &x_init,
+            const Eigen::MatrixBase<PType> &P_init);
 
   /**
    * @brief  Getter function for the state.
    *
+   * @tparam xType      State type.
+   *
    * @param[out] x_out  Output of the state.
    */
-  void getState(Eigen::MatrixBase<StateType> &x_out);
+  template <typename xType>
+  void getState(Eigen::MatrixBase<xType> &x_out);
 
   /**
    * @brief  Setter function for the state.
    *
+   * @tparam xType      State type.
+   *
    * @param[in] x_in    Input for the state.
    */
-  void setState(const Eigen::MatrixBase<StateType> &x_in);
+  template <typename xType>
+  void setState(const Eigen::MatrixBase<xType> &x_in);
 
   /**
    * @brief  Getter function for the state covariance.
    *
+   * @tparam PType      State Covariance type.
+   *
    * @param[out] x_out  Output of the state covariance.
    */
-  void getStateCovariance(Eigen::MatrixBase<StateCovarianceType> &P_out);
+  template <typename PType>
+  void getStateCovariance(Eigen::MatrixBase<PType> &P_out);
 
   /**
    * @brief  Setter function for the state covariance.
    *
+   * @tparam PType      State Covariance type.
+   *
    * @param[in] x_in    Input for the state covariance.
    */
-  void setStateCovariance(const Eigen::MatrixBase<StateCovarianceType> &P_in);
+  template <typename PType>
+  void setStateCovariance(const Eigen::MatrixBase<PType> &P_in);
 
   /**
    * @brief  Returns if the filter has been initialized.
@@ -162,71 +184,53 @@ public:
    */
   bool isInitialized() const;
 
-  /**
-   * @brief  Performs a prediction with a supplied prediction Jacobian and
-   *         control signal.
-   *
-   * @tparam ControlSignalType  Specifies the type of the control signal vector.
-   *                            It is generally not explicitly states when used.
-   *
-   * @param[in] F   Prediction Jacobian input.
-   * @param[in] u   Control signal input.
-   * @param[in] Q   Prediction covariance input.
-   */
-  template <typename ControlSignalType>
-  void predict(const Eigen::MatrixBase<PredictionJacobianType> &F,
-               const Eigen::MatrixBase<ControlSignalType> &u,
-               const Eigen::MatrixBase<StateCovarianceType> &Q);
 
   /**
-   * @brief  Performs a prediction with a supplied prediction Jacobian but
-   *         without control signal.
+   * @brief  Performs a prediction with a supplied prediction Jacobian.
    *
-   * @param[in] F   Prediction Jacobian input.
-   * @param[in] Q   Prediction covariance input.
+   * @tparam  FType       Type of the prediction Jacobian.
+   * @tparam  QType       Type of the prediction covariance.
+   * @tparam  ParamsType  Type list for optional parameters.
+   *
+   * @param[in] F       Prediction Jacobian input.
+   * @param[in] Q       Prediction covariance input.
+   * @param[in] params  List of optional parameters and control signals.
    */
-  void predict(const Eigen::MatrixBase<PredictionJacobianType> &F,
-               const Eigen::MatrixBase<StateCovarianceType> &Q);
-
-
-  /**
-   * @brief  Performs a prediction without a supplied prediction Jacobian but
-   *         with a control signal.
-   *
-   * @tparam ControlSignalType  Specifies the type of the control signal vector.
-   *                            It is generally not explicitly states when used.
-   *
-   * @note   This utilizes algorithmic differentiation.
-   *
-   * @param[in] u   Control signal input.
-   * @param[in] Q   Prediction covariance input.
-   */
-  template <typename ControlSignalType>
-  void predict(const Eigen::MatrixBase<ControlSignalType> &u,
-               const Eigen::MatrixBase<StateCovarianceType> &Q);
-
+  template <typename FType, typename QType, typename... ParamsType>
+  void predict(const Eigen::MatrixBase<FType> &F,
+               const Eigen::MatrixBase<QType> &Q,
+               const ParamsType & ...params);
 
   /**
    * @brief  Performs a prediction without a supplied prediction Jacobian and
-   *         without control signal.
+   *         utilizes algorithmic differentiation.
    *
-   * @note   This utilizes algorithmic differentiation.
+   * @tparam  QType       Type of the prediction covariance.
+   * @tparam  ParamsType  Type list for optional parameters.
    *
-   * @param[in] Q   Prediction covariance input.
+   * @param[in] Q       Prediction covariance input.
+   * @param[in] params  List of optional parameters and control signals.
    */
-  void predict(const Eigen::MatrixBase<StateCovarianceType> &Q);
+  template <typename QType, typename... ParamsType>
+  void predictAD(const Eigen::MatrixBase<QType> &Q,
+                 const ParamsType & ...params);
 
   /**
    * @brief  Applies a calculated prediction, from one of the predict functions,
    *         to the state and the covariance.
    *
+   * @tparam  fType       Type of the prediction state.
+   * @tparam  FType       Type of the prediction Jacobian.
+   * @tparam  QType       Type of the prediction covariance.
+   *
    * @param[in] f   Predicted new state.
    * @param[in] F   Prediction Jacobian.
    * @param[in] Q   Prediction covariance.
    */
-  void applyPrediction(const Eigen::MatrixBase<StateType> &f,
-                       const Eigen::MatrixBase<PredictionJacobianType> &F,
-                       const Eigen::MatrixBase<StateCovarianceType> &Q);
+  template <typename fType, typename FType, typename QType>
+  void applyPrediction(const Eigen::MatrixBase<fType> &f,
+                       const Eigen::MatrixBase<FType> &F,
+                       const Eigen::MatrixBase<QType> &Q);
 
   /**
    * @brief  Performs a measurement update of the filter utilizing the supplied
@@ -237,19 +241,23 @@ public:
    * @tparam  MeasurementFunctor  The supplied measurement Functor.
    * @tparam  MeasurementType     Type of the measurement.
    * @tparam  RType               Type of the measurement covariance.
+   * @tparam  ParamsType          Type list for optional parameters.
    *
    * @param[in] measurement   Measurement corresponding to the measurement
    *                          Functor.
    * @param[in] R             Measurement covariance input.
+   * @param[in] params        List of optional parameters.
    *
    * @return  Returns true if the measurement was accepted. False indicates
    *          that the outlier rejection rejected the measurement.
    */
   template <typename MeasurementFunctor,
             typename MeasurementType,
-            typename RType>
-  bool update(const Eigen::MatrixBase<MeasurementType> &measurement,
-              const Eigen::MatrixBase<RType> &R);
+            typename RType,
+            typename... ParamsType>
+  bool updateAD(const Eigen::MatrixBase<MeasurementType> &measurement,
+                const Eigen::MatrixBase<RType> &R,
+                const ParamsType & ...params);
 
   /**
    * @brief  Performs a measurement update of the filter utilizing the supplied
@@ -259,11 +267,13 @@ public:
    * @tparam  HType               Type of the measurement Jacobian.
    * @tparam  MeasurementType     Type of the measurement.
    * @tparam  RType               Type of the measurement covariance.
+   * @tparam  ParamsType          Type list for optional parameters.
    *
    * @param[in] H             Measurement Jacobian input.
    * @param[in] measurement   Measurement corresponding to the measurement
    *                          Functor.
    * @param[in] R             Measurement covariance input.
+   * @param[in] params        List of optional parameters.
    *
    * @return  Returns true if the measurement was accepted. False indicates
    *          that the outlier rejection rejected the measurement.
@@ -271,10 +281,12 @@ public:
   template <typename MeasurementFunctor,
             typename HType,
             typename MeasurementType,
-            typename RType>
+            typename RType,
+            typename... ParamsType>
   bool update(const Eigen::MatrixBase<HType> &H,
               const Eigen::MatrixBase<MeasurementType> &measurement,
-              const Eigen::MatrixBase<RType> &R);
+              const Eigen::MatrixBase<RType> &R,
+              const ParamsType & ...params);
 
   /**
    * @brief  Applies a calculated residual, from one of the update functions,
