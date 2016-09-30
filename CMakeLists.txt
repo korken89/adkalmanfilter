@@ -29,18 +29,18 @@ if (DO_TESTS)
 
   enable_testing()
 
-	######################################
-	# Find packages needed
-	######################################
+  ######################################
+  # Find packages needed
+  ######################################
   find_package(GTest REQUIRED)
-	#find_package(Eigen 3.3 REQUIRED )
+  #find_package(Eigen 3.3 REQUIRED )
 
-	# Hack for now Eigen 3.3 is soon released!
-	set( EIGEN33_INCLUDE_DIRS "/home/emifre/Git/eigen" )
+  # Hack for now Eigen 3.3 is soon released!
+  set( EIGEN33_INCLUDE_DIRS "/home/emifre/Git/eigen" )
 
-	######################################
-	# Set up the testing
-	######################################
+  ######################################
+  # Set up the testing
+  ######################################
 
 
   include_directories(
