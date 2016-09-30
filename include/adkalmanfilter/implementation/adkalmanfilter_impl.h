@@ -9,6 +9,26 @@ namespace ADKalmanFilter {
 /*
  *
  */
+template <typename Functor,
+          typename InputType,
+          typename JType,
+          typename... ParamsType>
+void getJacobianAD(const Eigen::MatrixBase<InputType> &input,
+                   Eigen::MatrixBase<JType> &J,
+                   const ParamsType & ...params)
+{
+  typename Functor::ValueType f;
+  typename Functor::JacobianType JJ;
+  Eigen::AutoDiffJacobian< Functor > adjac;
+
+  /* Calculate and return the Jacobian at the value of the input vector. */
+  adjac(input, &f, &JJ, params...);
+  J = JJ;
+}
+
+/*
+ *
+ */
 template <typename PredictionFunctor>
 ADKalmanFilter<PredictionFunctor>::ADKalmanFilter()
 {
@@ -104,6 +124,7 @@ bool ADKalmanFilter<PredictionFunctor>::isInitialized() const
 {
   return initialized;
 }
+
 
 /*
  *

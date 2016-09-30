@@ -2,47 +2,59 @@ cmake_minimum_required(VERSION 3.1)
 project(adkalmanfilter)
 
 ########################################
+# Options
+########################################
+option(DO_TESTS "Enable testing using GTest" ON)
+
+########################################
 # Enable C++11 and other C++ flags
 ########################################
 set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_EXPORT_COMPILE_COMMANDS 1)
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wno-long-long -pedantic")
 
-#find_package(Eigen3 REQUIRED )
-# Hack for now...
-set( EIGEN33_INCLUDE_DIRS "/home/emifre/Git/eigen" )
 
-###########
-## Build ##
-###########
 
-## Specify additional locations of header files
-## Your package locations should be listed before other locations
-# include_directories(include)
-include_directories(
-  ${EIGEN33_INCLUDE_DIRS}
-  include
-)
+########################################
+# Build
+########################################
 
-## Declare a C++ executable
-add_executable(adkalmanfilter
-  src/test/adkf_test.cpp
-)
+# No build, it's a template library
 
-## Add cmake target dependencies of the executable
-## same as for the library above
-#add_dependencies(adkalmanfilter
-#  ${${PROJECT_NAME}_EXPORTED_TARGETS}
-#  ${catkin_EXPORTED_TARGETS}
-#)
+########################################
+# Testing
+########################################
 
-## Specify libraries to link a library or executable target against
-target_link_libraries(adkalmanfilter
-  ${catkin_LIBRARIES}
-)
+if (DO_TESTS)
 
-## Printing
-#get_cmake_property(_variableNames VARIABLES)
-#foreach (_variableName ${_variableNames})
-#    message(STATUS "${_variableName}=${${_variableName}}")
-#endforeach()
+  enable_testing()
+
+	######################################
+	# Find packages needed
+	######################################
+  find_package(GTest REQUIRED)
+	#find_package(Eigen 3.3 REQUIRED )
+
+	# Hack for now Eigen 3.3 is soon released!
+	set( EIGEN33_INCLUDE_DIRS "/home/emifre/Git/eigen" )
+
+	######################################
+	# Set up the testing
+	######################################
+
+
+  include_directories(
+    ${GTEST_INCLUDE_DIRS}
+    ${EIGEN33_INCLUDE_DIRS}
+    include
+  )
+
+  #
+  # Unit Tests
+  #
+  add_executable(runKFTests src/test/adkf_test.cpp)
+  target_link_libraries(runKFTests ${GTEST_BOTH_LIBRARIES})
+  add_test(allTests runKFTests)
+
+endif()
+

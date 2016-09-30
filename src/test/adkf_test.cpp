@@ -1,27 +1,33 @@
-#include <iostream>
 #include <Eigen/Dense>
 #include "adkalmanfilter/adkalmanfilter.h"
+#include "gtest/gtest.h"
+#include <fstream>
 
-using namespace std;
+/*
+ * Settings for the test.
+ * If changed to float, EPS needs to be increased to about 1e-4.
+ */
+#define EPS 1e-10
+typedef double TestScalar;
 
+/*
+ * Functors for the KF tests.
+ */
 template <typename Scalar>
 struct predFunctor : public ADKalmanFilter::BaseFunctor<Scalar, 2>
 {
-  typedef Eigen::Matrix<Scalar, 1, 1> ControlType;
-
   /*
    * Implementation starts here.
    */
   template <typename T1, typename T2>
   void operator() (const T1 &input, T2 *output,
-                   const Eigen::Ref<const ControlType> &controlSignal,
                    const Scalar &dt) const
   {
     /* Implementation... */
     T2 &o = *output;
 
     o(0) = input(0) + dt*input(1);
-    o(1) = controlSignal(0);
+    o(1) = input(1);
   }
 };
 
@@ -42,62 +48,114 @@ struct measFunctor : public ADKalmanFilter::BaseFunctor<Scalar, 2, 1>,
   }
 };
 
-int main(int argc, char *argv[])
+/*
+ * Typedefs for ease of use.
+ */
+typedef Eigen::Matrix<TestScalar, 2, 1> StateType;
+typedef Eigen::Matrix<TestScalar, 1, 1> MeasType;
+typedef Eigen::Matrix<TestScalar, 1, 1> RType;
+typedef Eigen::Matrix<TestScalar, 2, 2> QType;
+typedef Eigen::Matrix<TestScalar, 1, 2> HType;
+typedef Eigen::Matrix<TestScalar, 2, 2> FType;
+
+/* Sampling time. */
+const TestScalar dt = 1e-2;
+
+/* Kalman Filter instantiation. */
+ADKalmanFilter::ADKalmanFilter< predFunctor<TestScalar> > kf;
+StateType out;
+QType P;
+
+TEST (ADKFTest, TestAutoDiff)
 {
-  typedef Eigen::Matrix<float, 2, 1> StateType;
-  typedef Eigen::Matrix<float, 1, 1> ContType;
-  typedef Eigen::Matrix<float, 1, 1> MeasType;
-  typedef Eigen::Matrix<float, 1, 1> RType;
-  typedef Eigen::Matrix<float, 2, 2> QType;
-  typedef Eigen::Matrix<float, 1, 2> HType;
-  typedef Eigen::Matrix<float, 2, 2> FType;
+  /* Test the AutoDiff. */
+  StateType x0 = StateType::Zero();
+  HType H_expect = HType::Identity();
+  HType H_out;
+  FType F_expect = (FType() << 1, dt, 0, 1).finished();
+  FType F_out;
 
-  std::srand((unsigned int) time(0));
+  /* Calculate and return the Jacobian at the value of the input vector. */
+  ADKalmanFilter::getJacobianAD< predFunctor<TestScalar> >(x0, F_out, dt);
+  ADKalmanFilter::getJacobianAD< measFunctor<TestScalar> >(x0, H_out);
 
-  double dt = 1e-2;
+  ASSERT_NEAR(F_expect(0,0), F_out(0,0), EPS);
+  ASSERT_NEAR(F_expect(0,1), F_out(0,1), EPS);
+  ASSERT_NEAR(F_expect(1,0), F_out(1,0), EPS);
+  ASSERT_NEAR(F_expect(1,1), F_out(1,1), EPS);
 
-  StateType in = StateType::Zero();
-  ContType u = ContType::Zero();
-  MeasType meas = MeasType::Random();
-  RType R = RType::Identity();
-  QType Q = QType::Identity();
-  HType H = HType::Identity();
-  FType F = FType::Ones();
-  F(1,0) = 0;
-  in.setZero();
+  ASSERT_NEAR(H_expect(0,0), H_out(0,0), EPS);
+  ASSERT_NEAR(H_expect(0,1), H_out(0,1), EPS);
+}
 
-  ADKalmanFilter::ADKalmanFilter< predFunctor<float> > kf(in, Q);
-
-  typedef typename ADKalmanFilter::ADKalmanFilter< predFunctor<float> >::StateType StateType;
-  typedef typename ADKalmanFilter::ADKalmanFilter< predFunctor<float> >::StateCovarianceType StateCovarianceType;
+TEST (ADKFTest, TestInitialization)
+{
 
   StateType out;
-  StateCovarianceType P;
+  QType P;
 
-  kf.predict(F, Q, u, dt);
-  //kf.predict(F, Q);
-  kf.predictAD(Q, u, dt);
-  //kf.predict(Q);
-  kf.update< measFunctor<float> >(H, meas, R);
+  /* Initialize the filter. */
+  StateType x0 = StateType::Zero();
+  QType P0 = (QType() << 10, 0, 0, 0).finished();
+
+
+  ASSERT_EQ(false, kf.isInitialized());
+  kf.init(x0, P0);
+  ASSERT_EQ(true, kf.isInitialized());
 
   kf.getState(out);
   kf.getStateCovariance(P);
-  std::cout << "x = " << std::endl << out << std::endl << std::endl;
-  std::cout << "u = " << std::endl << u << std::endl << std::endl;
-  std::cout << "P = " << std::endl << P << std::endl << std::endl;
 
-  std::cout << "Running a lot of iterations... " << std::endl << std::endl;
-  for (auto i = 0; i < 1e5; i++)
+  ASSERT_NEAR(P0(0,0), P(0,0), EPS);
+  ASSERT_NEAR(P0(0,1), P(0,1), EPS);
+  ASSERT_NEAR(P0(1,0), P(1,0), EPS);
+  ASSERT_NEAR(P0(1,1), P(1,1), EPS);
+
+  ASSERT_NEAR(x0(0), out(0), EPS);
+  ASSERT_NEAR(x0(1), out(1), EPS);
+
+}
+
+TEST (ADKFTest, TestRangeDatasetWithOutlierRejection)
+{
+  std::ifstream rangefile("../test_data/distance_with_outliers.csv");
+
+  TestScalar range, p_out, v_out;
+  bool is_outlier, accepted;
+  StateType x;
+  QType P;
+
+  MeasType meas;
+  RType R = (RType() << 0.0016).finished();
+  QType Q = (QType() << 0, 0, 0, 1e-2).finished();
+  QType Pend = (QType() << 0.000320889946971756, 0.00357646478842555,
+                           0.00357646478842555,  0.0897226644867756).finished();
+
+  while (rangefile >> range >> is_outlier >> p_out >> v_out)
   {
-    meas = MeasType::Random();
-    kf.predictAD(Q, u, dt);
-    kf.updateAD< measFunctor<float> >(meas, R);
+    /* Run the filter over the test data. */
+    meas << range;
+    kf.predictAD(Q, dt);
+    accepted = kf.updateAD< measFunctor<TestScalar> >(meas, R);
+
+    kf.getState(x);
+    ASSERT_NEAR(p_out, x(0), EPS);
+    ASSERT_NEAR(v_out, x(1), EPS);
+    ASSERT_EQ(is_outlier, !accepted);
   }
 
-  kf.getState(out);
   kf.getStateCovariance(P);
-  std::cout << "x = " << std::endl << out << std::endl << std::endl;
-  std::cout << "P = " << std::endl << P << std::endl << std::endl;
 
-  return 0;
+  ASSERT_NEAR(Pend(0,0), P(0,0), EPS);
+  ASSERT_NEAR(Pend(0,1), P(0,1), EPS);
+  ASSERT_NEAR(Pend(1,0), P(1,0), EPS);
+  ASSERT_NEAR(Pend(1,1), P(1,1), EPS);
 }
+
+int main(int argc, char *argv[])
+{
+  std::srand((unsigned int) time(0));
+  ::testing::InitGoogleTest(&argc, argv);
+  return RUN_ALL_TESTS();
+}
+

@@ -44,6 +44,27 @@ struct BaseFunctor
   typedef Eigen::Matrix<Scalar, M, M> CovarianceType;
 };
 
+/**
+ * @brief  Convenience function for testing Jacobians from Functors at some
+ *         specific input value.
+ *
+ * @tparam  Functor     The functor to generate a Jacobian for.
+ * @tparam  InputType   Type of the input vector.
+ * @tparam  JType       Type of the Jacobian.
+ * @tparam  ParamsType  Type list for optional parameters.
+ *
+ * @param[in] input   Input vector to evaluate the Jacobian at.
+ * @param[out] J      Jacobian output.
+ * @param[in] params  List of optional parameters and control signals.
+ */
+template <typename Functor,
+          typename InputType,
+          typename JType,
+          typename... ParamsType>
+static void getJacobianAD(const Eigen::MatrixBase<InputType> &input,
+                          Eigen::MatrixBase<JType> *J,
+                          const ParamsType & ...params);
+
 
 /**
  * @brief   Main class for the AutoDiff Kalman Filter.
@@ -196,7 +217,6 @@ public:
    * @return True if the filter has been initialized.
    */
   bool isInitialized() const;
-
 
   /**
    * @brief  Performs a prediction with a supplied prediction Jacobian.
