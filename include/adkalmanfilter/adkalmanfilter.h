@@ -62,7 +62,7 @@ template <typename Functor,
           typename JType,
           typename... ParamsType>
 static void getJacobianAD(const Eigen::MatrixBase<InputType> &input,
-                          Eigen::MatrixBase<JType> *J,
+                          Eigen::MatrixBase<JType> &J,
                           const ParamsType & ...params);
 
 
