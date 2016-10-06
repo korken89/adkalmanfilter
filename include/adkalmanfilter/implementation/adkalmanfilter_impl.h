@@ -5,21 +5,17 @@
 #define _AD_KF_IMPL_H
 
 namespace ADKalmanFilter {
-
 /*
  *
  */
-template <typename Functor,
-          typename InputType,
-          typename JType,
+template <typename Functor, typename InputType, typename JType,
           typename... ParamsType>
 void getJacobianAD(const Eigen::MatrixBase<InputType> &input,
-                   Eigen::MatrixBase<JType> &J,
-                   const ParamsType & ...params)
+                   Eigen::MatrixBase<JType> &J, const ParamsType &... params)
 {
   typename Functor::ValueType f;
   typename Functor::JacobianType JJ;
-  Eigen::AutoDiffJacobian< Functor > adjac;
+  Eigen::AutoDiffJacobian<Functor> adjac;
 
   /* Calculate and return the Jacobian at the value of the input vector. */
   adjac(input, &f, &JJ, params...);
@@ -41,8 +37,8 @@ ADKalmanFilter<PredictionFunctor>::ADKalmanFilter()
 template <typename PredictionFunctor>
 template <typename xType, typename PType>
 ADKalmanFilter<PredictionFunctor>::ADKalmanFilter(
-              const Eigen::MatrixBase<xType> &x_init,
-              const Eigen::MatrixBase<PType> &P_init)
+    const Eigen::MatrixBase<xType> &x_init,
+    const Eigen::MatrixBase<PType> &P_init)
 {
   init(x_init, P_init);
 }
@@ -53,8 +49,8 @@ ADKalmanFilter<PredictionFunctor>::ADKalmanFilter(
 template <typename PredictionFunctor>
 template <typename xType, typename PType>
 void ADKalmanFilter<PredictionFunctor>::init(
-              const Eigen::MatrixBase<xType> &x_init,
-              const Eigen::MatrixBase<PType> &P_init)
+    const Eigen::MatrixBase<xType> &x_init,
+    const Eigen::MatrixBase<PType> &P_init)
 {
   EIGEN_STATIC_ASSERT_SAME_MATRIX_SIZE(xType, StateType)
   EIGEN_STATIC_ASSERT_SAME_MATRIX_SIZE(PType, StateCovarianceType)
@@ -70,7 +66,7 @@ void ADKalmanFilter<PredictionFunctor>::init(
 template <typename PredictionFunctor>
 template <typename xType>
 void ADKalmanFilter<PredictionFunctor>::getState(
-              Eigen::MatrixBase<xType> &x_out)
+    Eigen::MatrixBase<xType> &x_out)
 {
   EIGEN_STATIC_ASSERT_SAME_MATRIX_SIZE(xType, StateType)
 
@@ -83,7 +79,7 @@ void ADKalmanFilter<PredictionFunctor>::getState(
 template <typename PredictionFunctor>
 template <typename xType>
 void ADKalmanFilter<PredictionFunctor>::setState(
-              const Eigen::MatrixBase<xType> &x_in)
+    const Eigen::MatrixBase<xType> &x_in)
 {
   EIGEN_STATIC_ASSERT_SAME_MATRIX_SIZE(xType, StateType)
 
@@ -96,7 +92,7 @@ void ADKalmanFilter<PredictionFunctor>::setState(
 template <typename PredictionFunctor>
 template <typename PType>
 void ADKalmanFilter<PredictionFunctor>::getStateCovariance(
-              Eigen::MatrixBase<PType> &P_out)
+    Eigen::MatrixBase<PType> &P_out)
 {
   EIGEN_STATIC_ASSERT_SAME_MATRIX_SIZE(PType, StateCovarianceType)
 
@@ -109,7 +105,7 @@ void ADKalmanFilter<PredictionFunctor>::getStateCovariance(
 template <typename PredictionFunctor>
 template <typename PType>
 void ADKalmanFilter<PredictionFunctor>::setStateCovariance(
-              const Eigen::MatrixBase<PType> &P_in)
+    const Eigen::MatrixBase<PType> &P_in)
 {
   EIGEN_STATIC_ASSERT_SAME_MATRIX_SIZE(PType, StateCovarianceType)
 
@@ -125,16 +121,14 @@ bool ADKalmanFilter<PredictionFunctor>::isInitialized() const
   return initialized;
 }
 
-
 /*
  *
  */
 template <typename PredictionFunctor>
 template <typename FType, typename QType, typename... ParamsType>
 void ADKalmanFilter<PredictionFunctor>::predict(
-              const Eigen::MatrixBase<FType> &F,
-              const Eigen::MatrixBase<QType> &Q,
-              const ParamsType & ...params)
+    const Eigen::MatrixBase<FType> &F, const Eigen::MatrixBase<QType> &Q,
+    const ParamsType &... params)
 {
   /*
    * Error checking.
@@ -150,15 +144,13 @@ void ADKalmanFilter<PredictionFunctor>::predict(
   applyPrediction(f, F, Q);
 }
 
-
 /*
  *
  */
 template <typename PredictionFunctor>
 template <typename QType, typename... ParamsType>
 void ADKalmanFilter<PredictionFunctor>::predictAD(
-              const Eigen::MatrixBase<QType> &Q,
-              const ParamsType & ...params)
+    const Eigen::MatrixBase<QType> &Q, const ParamsType &... params)
 {
   /*
    * Error checking.
@@ -170,7 +162,7 @@ void ADKalmanFilter<PredictionFunctor>::predictAD(
    */
   StateType f;
   PredictionJacobianType F;
-  Eigen::AutoDiffJacobian< PredictionFunctor > adjac;
+  Eigen::AutoDiffJacobian<PredictionFunctor> adjac;
 
   adjac(x, &f, &F, params...);
   applyPrediction(f, F, Q);
@@ -182,26 +174,25 @@ void ADKalmanFilter<PredictionFunctor>::predictAD(
 template <typename PredictionFunctor>
 template <typename fType, typename FType, typename QType>
 void ADKalmanFilter<PredictionFunctor>::applyPrediction(
-              const Eigen::MatrixBase<fType> &f,
-              const Eigen::MatrixBase<FType> &F,
-              const Eigen::MatrixBase<QType> &Q)
+    const Eigen::MatrixBase<fType> &f, const Eigen::MatrixBase<FType> &F,
+    const Eigen::MatrixBase<QType> &Q)
 {
   /*
    * Error checking.
    */
-  EIGEN_STATIC_ASSERT(int(fType::RowsAtCompileTime) ==
-                      int(StateType::RowsAtCompileTime) &&
-                      int(fType::ColsAtCompileTime) == 1,
-                      "fType has wrong size")
+  EIGEN_STATIC_ASSERT(
+      int(fType::RowsAtCompileTime) == int(StateType::RowsAtCompileTime) &&
+          int(fType::ColsAtCompileTime) == 1,
+      "fType has wrong size")
   EIGEN_STATIC_ASSERT(int(FType::RowsAtCompileTime) ==
-                      int(StateCovarianceType::RowsAtCompileTime) &&
-                      int(FType::ColsAtCompileTime) ==
-                      int(StateCovarianceType::RowsAtCompileTime),
+                              int(StateCovarianceType::RowsAtCompileTime) &&
+                          int(FType::ColsAtCompileTime) ==
+                              int(StateCovarianceType::RowsAtCompileTime),
                       "FType has wrong size")
   EIGEN_STATIC_ASSERT(int(QType::RowsAtCompileTime) ==
-                      int(StateCovarianceType::RowsAtCompileTime) &&
-                      int(QType::ColsAtCompileTime) ==
-                      int(StateCovarianceType::RowsAtCompileTime),
+                              int(StateCovarianceType::RowsAtCompileTime) &&
+                          int(QType::ColsAtCompileTime) ==
+                              int(StateCovarianceType::RowsAtCompileTime),
                       "QType has wrong size")
 
   /*
@@ -215,26 +206,22 @@ void ADKalmanFilter<PredictionFunctor>::applyPrediction(
  *
  */
 template <typename PredictionFunctor>
-template <typename MeasurementFunctor,
-          typename MeasurementType,
-          typename RType,
+template <typename MeasurementFunctor, typename MeasurementType, typename RType,
           typename... ParamsType>
 bool ADKalmanFilter<PredictionFunctor>::updateAD(
-              const Eigen::MatrixBase<MeasurementType> &measurement,
-              const Eigen::MatrixBase<RType> &R,
-              const ParamsType & ...params)
+    const Eigen::MatrixBase<MeasurementType> &measurement,
+    const Eigen::MatrixBase<RType> &R, const ParamsType &... params)
 {
   /*
    * Error checking.
    */
   EIGEN_STATIC_ASSERT(int(MeasurementFunctor::InputType::RowsAtCompileTime) ==
-                      int(PredictionFunctor::InputType::RowsAtCompileTime),
+                          int(PredictionFunctor::InputType::RowsAtCompileTime),
                       "MeasurementFunctor has wrong state size")
 
   EIGEN_STATIC_ASSERT(int(MeasurementFunctor::ValueType::RowsAtCompileTime) ==
-                      int(MeasurementType::RowsAtCompileTime) &&
-                      int(MeasurementType::ColsAtCompileTime) ==
-                      1,
+                              int(MeasurementType::RowsAtCompileTime) &&
+                          int(MeasurementType::ColsAtCompileTime) == 1,
                       "MeasurementType has wrong size");
 
   /*
@@ -243,15 +230,14 @@ bool ADKalmanFilter<PredictionFunctor>::updateAD(
   typedef Eigen::Matrix<Scalar,
                         MeasurementFunctor::ValueType::RowsAtCompileTime,
                         MeasurementFunctor::InputType::RowsAtCompileTime>
-                          HType;
-
+      HType;
 
   /*
    * Implementation.
    */
   eigen_assert(initialized == true);
 
-  Eigen::AutoDiffJacobian< MeasurementFunctor > adjac;
+  Eigen::AutoDiffJacobian<MeasurementFunctor> adjac;
   HType Had;
   MeasurementType residual, h;
 
@@ -267,28 +253,23 @@ bool ADKalmanFilter<PredictionFunctor>::updateAD(
  *
  */
 template <typename PredictionFunctor>
-template <typename MeasurementFunctor,
-          typename HType,
-          typename MeasurementType,
-          typename RType,
-          typename... ParamsType>
+template <typename MeasurementFunctor, typename HType, typename MeasurementType,
+          typename RType, typename... ParamsType>
 bool ADKalmanFilter<PredictionFunctor>::update(
-              const Eigen::MatrixBase<HType> &H,
-              const Eigen::MatrixBase<MeasurementType> &measurement,
-              const Eigen::MatrixBase<RType> &R,
-              const ParamsType & ...params)
+    const Eigen::MatrixBase<HType> &H,
+    const Eigen::MatrixBase<MeasurementType> &measurement,
+    const Eigen::MatrixBase<RType> &R, const ParamsType &... params)
 {
   /*
    * Error checking.
    */
   EIGEN_STATIC_ASSERT(int(MeasurementFunctor::InputType::RowsAtCompileTime) ==
-                      int(PredictionFunctor::InputType::RowsAtCompileTime),
+                          int(PredictionFunctor::InputType::RowsAtCompileTime),
                       "MeasurementFunctor has wrong state size");
 
   EIGEN_STATIC_ASSERT(int(MeasurementFunctor::ValueType::RowsAtCompileTime) ==
-                      int(MeasurementType::RowsAtCompileTime) &&
-                      int(MeasurementType::ColsAtCompileTime) ==
-                      1,
+                              int(MeasurementType::RowsAtCompileTime) &&
+                          int(MeasurementType::ColsAtCompileTime) == 1,
                       "MeasurementType has wrong size");
 
   /*
@@ -296,7 +277,7 @@ bool ADKalmanFilter<PredictionFunctor>::update(
    */
   eigen_assert(initialized == true);
 
-  Eigen::AutoDiffJacobian< MeasurementFunctor > adjac;
+  Eigen::AutoDiffJacobian<MeasurementFunctor> adjac;
   MeasurementType residual, h;
 
   MeasurementFunctor()(x, &h, params...);
@@ -308,47 +289,45 @@ bool ADKalmanFilter<PredictionFunctor>::update(
  *
  */
 template <typename PredictionFunctor>
-template <typename MeasurementFunctor,
-          typename HType,
-          typename MeasurementType,
+template <typename MeasurementFunctor, typename HType, typename MeasurementType,
           typename RType>
 bool ADKalmanFilter<PredictionFunctor>::applyResidual(
-              const Eigen::MatrixBase<HType> &H,
-              const Eigen::MatrixBase<MeasurementType> &residual,
-              const Eigen::MatrixBase<RType> &R)
+    const Eigen::MatrixBase<HType> &H,
+    const Eigen::MatrixBase<MeasurementType> &residual,
+    const Eigen::MatrixBase<RType> &R)
 {
   /*
    * Error checking.
    */
-  EIGEN_STATIC_ASSERT((std::is_same<Scalar,
-                      typename MeasurementFunctor::InputType::Scalar>::value),
+  EIGEN_STATIC_ASSERT(
+      (std::is_same<Scalar,
+                    typename MeasurementFunctor::InputType::Scalar>::value),
       "PredictionFunctor and MeasurementFunctor are of different Scalar types")
 
-  EIGEN_STATIC_ASSERT(int(HType::RowsAtCompileTime) ==
-                      int(MeasurementType::RowsAtCompileTime) &&
-                      int(HType::ColsAtCompileTime) ==
-                      int(StateType::RowsAtCompileTime),
-                      "HType has wrong size")
+  EIGEN_STATIC_ASSERT(
+      int(HType::RowsAtCompileTime) ==
+              int(MeasurementType::RowsAtCompileTime) &&
+          int(HType::ColsAtCompileTime) == int(StateType::RowsAtCompileTime),
+      "HType has wrong size")
 
-  EIGEN_STATIC_ASSERT(int(RType::RowsAtCompileTime) ==
-                      int(MeasurementFunctor::ValueType::RowsAtCompileTime) &&
-                      int(RType::ColsAtCompileTime) ==
-                      int(MeasurementFunctor::ValueType::RowsAtCompileTime),
-                      "RType has wrong size")
+  EIGEN_STATIC_ASSERT(
+      int(RType::RowsAtCompileTime) ==
+              int(MeasurementFunctor::ValueType::RowsAtCompileTime) &&
+          int(RType::ColsAtCompileTime) ==
+              int(MeasurementFunctor::ValueType::RowsAtCompileTime),
+      "RType has wrong size")
 
   EIGEN_STATIC_ASSERT(int(MeasurementFunctor::ValueType::RowsAtCompileTime) ==
-                      int(MeasurementType::RowsAtCompileTime) &&
-                      int(MeasurementType::ColsAtCompileTime) ==
-                      1,
+                              int(MeasurementType::RowsAtCompileTime) &&
+                          int(MeasurementType::ColsAtCompileTime) == 1,
                       "residual has wrong size");
 
   /*
    * Definitions.
    */
-  typedef Eigen::Matrix<Scalar,
-                        StateType::RowsAtCompileTime,
+  typedef Eigen::Matrix<Scalar, StateType::RowsAtCompileTime,
                         MeasurementType::RowsAtCompileTime>
-                        KalmanGainType;
+      KalmanGainType;
 
   /*
    * Implementation.
@@ -361,11 +340,10 @@ bool ADKalmanFilter<PredictionFunctor>::applyResidual(
    * TODO: Figure out why... */
 
   /* Apply outlier rejection before we do all the heavy calculations. */
-  if (MeasurementFunctor().rejectMeasurement(Sinv, residual) == false)
-  {
+  if (MeasurementFunctor().rejectMeasurement(Sinv, residual) == false) {
     /* Update using the positive Joseph form. */
     KalmanGainType K = P * H.transpose() * Sinv;
-    StateCovarianceType KH = StateCovarianceType::Identity() - K*H;
+    StateCovarianceType KH = StateCovarianceType::Identity() - K * H;
 
     P = KH * P * KH.transpose() + K * R * K.transpose();
     x += K * residual;
@@ -375,11 +353,10 @@ bool ADKalmanFilter<PredictionFunctor>::applyResidual(
 
     return true;
   }
-  else
+  else {
     return false;
+  }
 }
-
 }
 
 #endif
-

@@ -8,8 +8,7 @@ namespace ADKalmanFilter {
 /**
  * @brief   Used for defining no outlier rejection.
  */
-struct NoOutlierRejection
-{
+struct NoOutlierRejection {
   /**
    * @brief   Required function of the ADKalmanFilter. This version accepts all
    *          mesaurements.
@@ -23,13 +22,11 @@ struct NoOutlierRejection
   }
 };
 
-
 /**
  * @brief   Mahalanobis distance based outlier rejection.
  */
 template <int NStdDevs>
-struct MahalanobisOutlierRejection
-{
+struct MahalanobisOutlierRejection {
   /**
    * @brief   Required function of the ADKalmanFilter. This version accepts a
    *          mesaurement if the Mahalanobis distance is below a given
@@ -46,10 +43,9 @@ struct MahalanobisOutlierRejection
 
     /* Calculate the Mahalanobis distance: sqrt( r^T * S^-1 * r )
        Simple thresholding for testing measurements. */
-    return (Scalar(NStdDevs*NStdDevs) < (r.transpose() * Sinv * r).value());
+    return (Scalar(NStdDevs * NStdDevs) < (r.transpose() * Sinv * r).value());
   }
 };
-
 }
 
 #endif
