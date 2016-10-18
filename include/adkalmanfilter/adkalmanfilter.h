@@ -32,14 +32,24 @@ struct BaseFunctor {
   typedef Eigen::Matrix<Scalar, M, 1> ValueType;
 
   /**
+   * @typedef   Definition of the scalar type, is a helper type.
+   */
+  typedef Scalar ScalarType;
+
+  /**
    * @typedef   Definition of the Jacobian, is a helper type.
    */
   typedef Eigen::Matrix<Scalar, M, N> JacobianType;
 
   /**
-   * @typedef   Definition of the covariance, is a helper type.
+   * @typedef   Definition of the input covariance, is a helper type.
    */
-  typedef Eigen::Matrix<Scalar, M, M> CovarianceType;
+  typedef Eigen::Matrix<Scalar, M, M> InputCovarianceType;
+
+  /**
+   * @typedef   Definition of the output covariance, is a helper type.
+   */
+  typedef Eigen::Matrix<Scalar, N, N> OutputCovarianceType;
 };
 
 /**
@@ -111,7 +121,7 @@ public:
    * @typedef   Defines the scalar type of the filter from the prediction
    *            Functor's type. The measurement Functor must use this type.
    */
-  typedef typename PredictionFunctor::InputType::Scalar Scalar;
+  typedef typename PredictionFunctor::ScalarType Scalar;
 
   /**
    * @typedef   Defines the state type from the prediction Functor. The
@@ -122,7 +132,7 @@ public:
   /**
    * @typedef   Uses the state type to infer the size of the state covariance.
    */
-  typedef typename PredictionFunctor::CovarianceType StateCovarianceType;
+  typedef typename PredictionFunctor::InputCovarianceType StateCovarianceType;
 
   /**
    * @typedef   Uses the state covariance type to infer the size of the
