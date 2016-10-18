@@ -44,12 +44,12 @@ struct BaseFunctor {
   /**
    * @typedef   Definition of the input covariance, is a helper type.
    */
-  typedef Eigen::Matrix<Scalar, M, M> InputCovarianceType;
+  typedef Eigen::Matrix<Scalar, N, N> InputCovarianceType;
 
   /**
    * @typedef   Definition of the output covariance, is a helper type.
    */
-  typedef Eigen::Matrix<Scalar, N, N> OutputCovarianceType;
+  typedef Eigen::Matrix<Scalar, M, M> OutputCovarianceType;
 };
 
 /**
