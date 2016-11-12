@@ -11,7 +11,7 @@ namespace ADKalmanFilter {
 struct NoOutlierRejection {
   /**
    * @brief   Required function of the ADKalmanFilter. This version accepts all
-   *          mesaurements.
+   *          measurements.
    *
    * @tparam  Params   List of parameters to ignore.
    */
@@ -29,7 +29,7 @@ template <int NStdDevs>
 struct MahalanobisOutlierRejection {
   /**
    * @brief   Required function of the ADKalmanFilter. This version accepts a
-   *          mesaurement if the Mahalanobis distance is below a given
+   *          measurement if the Mahalanobis distance is below a given
    *          threshold.
    *
    * @tparam  SMatrix   Type of the inverted S matrix.

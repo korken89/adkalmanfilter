@@ -110,7 +110,7 @@ public:
    * All functors have the following defined types defined in BaseFunctor:
    *
    * Functor::InputType
-   * Functor::ValueType
+   * Functor::ValueType (output type)
    * Functor::JacobianType
    * Functor::Covariance
    *
