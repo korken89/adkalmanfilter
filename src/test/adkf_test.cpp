@@ -24,8 +24,11 @@ struct predFunctor : public ADKalmanFilter::BaseFunctor<Scalar, 2> {
     /* Implementation... */
     T2 &o = *output;
 
-    o(0) = input(0) + dt * input(1);
-    o(1) = input(1);
+    auto i0 = input(0);
+    auto i1 = input(1);
+
+    o(0) = i0 + dt * i1;
+    o(1) = i1;
   }
 };
 

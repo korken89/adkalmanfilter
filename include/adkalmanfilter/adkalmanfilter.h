@@ -3,7 +3,8 @@
 #ifndef _AD_KF_H
 #define _AD_KF_H
 
-namespace ADKalmanFilter {
+namespace ADKalmanFilter
+{
 /**
  * @brief   Base functor for the PredictionFunctor and MeasurementFunctor
  *          to define required types for the AutoDiff module.
@@ -13,7 +14,8 @@ namespace ADKalmanFilter {
  * @tparam    M       Number of rows in the output vector. Defaults to N.
  */
 template <typename Scalar, int N, int M = N>
-struct BaseFunctor {
+struct BaseFunctor
+{
   /*
    * Definitions required for input and output type.
    * Used by the AutoDiff to find Jacobians and ADKalmanFilter to infer sizes.
@@ -42,12 +44,14 @@ struct BaseFunctor {
   typedef Eigen::Matrix<Scalar, M, N> JacobianType;
 
   /**
-   * @typedef   Definition of the input covariance, is a helper type.
+   * @typedef   Definition of a covariance with the size of the input, is a
+   *            helper type.
    */
   typedef Eigen::Matrix<Scalar, N, N> InputCovarianceType;
 
   /**
-   * @typedef   Definition of the output covariance, is a helper type.
+   * @typedef   Definition of a covariance with the size of the output, is a
+   *            helper type.
    */
   typedef Eigen::Matrix<Scalar, M, M> OutputCovarianceType;
 };
@@ -94,7 +98,8 @@ static void getJacobianAD(const Eigen::MatrixBase<InputType>& input,
  *                              predictions.
  */
 template <typename PredictionFunctor>
-class ADKalmanFilter {
+class ADKalmanFilter
+{
 public:
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
