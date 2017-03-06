@@ -10,6 +10,10 @@ Contributions are most welcome!
 
 The AD-KF was designed for ease of use while still being very fast and efficient, and to this end it is based on the latest version of the Eigen template library for numerical computations and also utilizing Eigen's AutoDiff module for Automatic/Algorithmic Differentiation to find the prediction and measurement Jacobians if none are supplied. For a primer on AutoDiff the [Wikipedia article](https://en.wikipedia.org/wiki/Automatic_differentiation) covers most of it, but in short it is NOT Numerical Differentiation nor Symbolic Differentiation, rather it applies the chain rule on computations to find derivatives.
 
+### TODO
+
+* Add a way to say if the measurement functor is feasible. Check if the measurement functor should just return a bool.
+
 ### General structure
 
 To use the library two `Functors` need to be defined, one `PredictionFunctor` and one (or multiple) `MeasurementFunctor` -- these define the state size, Jacobian sizes etc. for the AD-KF as will be described in the following sections.
