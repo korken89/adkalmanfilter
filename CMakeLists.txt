@@ -11,7 +11,7 @@ option(DO_TESTS "Enable testing using GTest" ON)
 ########################################
 set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_EXPORT_COMPILE_COMMANDS 1)
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wno-long-long -pedantic")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-gnu-statement-expression -Wall -Wno-long-long -pedantic")
 
 
 
