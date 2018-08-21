@@ -1,21 +1,21 @@
 #include <Eigen/Dense>
 #include <unsupported/Eigen/AutoDiff>
 
-#ifndef _AD_KF_IMPL_H
-#define _AD_KF_IMPL_H
+#pragma once
 
-namespace ADKalmanFilter {
+namespace ADKalmanFilter
+{
 /*
  *
  */
-template <typename Functor, typename InputType, typename JType,
-          typename... ParamsType>
-void getJacobianAD(const Eigen::MatrixBase<InputType> &input,
-                   Eigen::MatrixBase<JType> &J, const ParamsType &... params)
+template < typename Functor, typename InputType, typename JType,
+           typename... ParamsType >
+void getJacobianAD(const Eigen::MatrixBase< InputType > &input,
+                   Eigen::MatrixBase< JType > &J, const ParamsType &... params)
 {
   typename Functor::ValueType f;
   typename Functor::JacobianType JJ;
-  Eigen::AutoDiffJacobian<Functor> adjac;
+  Eigen::AutoDiffJacobian< Functor > adjac;
 
   /* Calculate and return the Jacobian at the value of the input vector. */
   adjac(input, &f, &JJ, params...);
@@ -25,8 +25,8 @@ void getJacobianAD(const Eigen::MatrixBase<InputType> &input,
 /*
  *
  */
-template <typename PredictionFunctor>
-ADKalmanFilter<PredictionFunctor>::ADKalmanFilter()
+template < typename PredictionFunctor >
+ADKalmanFilter< PredictionFunctor >::ADKalmanFilter()
 {
   initialized = false;
 }
@@ -34,11 +34,11 @@ ADKalmanFilter<PredictionFunctor>::ADKalmanFilter()
 /*
  *
  */
-template <typename PredictionFunctor>
-template <typename xType, typename PType>
-ADKalmanFilter<PredictionFunctor>::ADKalmanFilter(
-    const Eigen::MatrixBase<xType> &x_init,
-    const Eigen::MatrixBase<PType> &P_init)
+template < typename PredictionFunctor >
+template < typename xType, typename PType >
+ADKalmanFilter< PredictionFunctor >::ADKalmanFilter(
+    const Eigen::MatrixBase< xType > &x_init,
+    const Eigen::MatrixBase< PType > &P_init)
 {
   init(x_init, P_init);
 }
@@ -46,11 +46,11 @@ ADKalmanFilter<PredictionFunctor>::ADKalmanFilter(
 /*
  *
  */
-template <typename PredictionFunctor>
-template <typename xType, typename PType>
-void ADKalmanFilter<PredictionFunctor>::init(
-    const Eigen::MatrixBase<xType> &x_init,
-    const Eigen::MatrixBase<PType> &P_init)
+template < typename PredictionFunctor >
+template < typename xType, typename PType >
+void ADKalmanFilter< PredictionFunctor >::init(
+    const Eigen::MatrixBase< xType > &x_init,
+    const Eigen::MatrixBase< PType > &P_init)
 {
   EIGEN_STATIC_ASSERT_SAME_MATRIX_SIZE(xType, StateType)
   EIGEN_STATIC_ASSERT_SAME_MATRIX_SIZE(PType, StateCovarianceType)
@@ -63,10 +63,10 @@ void ADKalmanFilter<PredictionFunctor>::init(
 /*
  *
  */
-template <typename PredictionFunctor>
-template <typename xType>
-void ADKalmanFilter<PredictionFunctor>::getState(
-    Eigen::MatrixBase<xType> &x_out)
+template < typename PredictionFunctor >
+template < typename xType >
+void ADKalmanFilter< PredictionFunctor >::getState(
+    Eigen::MatrixBase< xType > &x_out)
 {
   EIGEN_STATIC_ASSERT_SAME_MATRIX_SIZE(xType, StateType)
 
@@ -76,10 +76,10 @@ void ADKalmanFilter<PredictionFunctor>::getState(
 /*
  *
  */
-template <typename PredictionFunctor>
-template <typename xType>
-void ADKalmanFilter<PredictionFunctor>::setState(
-    const Eigen::MatrixBase<xType> &x_in)
+template < typename PredictionFunctor >
+template < typename xType >
+void ADKalmanFilter< PredictionFunctor >::setState(
+    const Eigen::MatrixBase< xType > &x_in)
 {
   EIGEN_STATIC_ASSERT_SAME_MATRIX_SIZE(xType, StateType)
 
@@ -89,10 +89,10 @@ void ADKalmanFilter<PredictionFunctor>::setState(
 /*
  *
  */
-template <typename PredictionFunctor>
-template <typename PType>
-void ADKalmanFilter<PredictionFunctor>::getStateCovariance(
-    Eigen::MatrixBase<PType> &P_out)
+template < typename PredictionFunctor >
+template < typename PType >
+void ADKalmanFilter< PredictionFunctor >::getStateCovariance(
+    Eigen::MatrixBase< PType > &P_out)
 {
   EIGEN_STATIC_ASSERT_SAME_MATRIX_SIZE(PType, StateCovarianceType)
 
@@ -102,10 +102,10 @@ void ADKalmanFilter<PredictionFunctor>::getStateCovariance(
 /*
  *
  */
-template <typename PredictionFunctor>
-template <typename PType>
-void ADKalmanFilter<PredictionFunctor>::setStateCovariance(
-    const Eigen::MatrixBase<PType> &P_in)
+template < typename PredictionFunctor >
+template < typename PType >
+void ADKalmanFilter< PredictionFunctor >::setStateCovariance(
+    const Eigen::MatrixBase< PType > &P_in)
 {
   EIGEN_STATIC_ASSERT_SAME_MATRIX_SIZE(PType, StateCovarianceType)
 
@@ -115,8 +115,8 @@ void ADKalmanFilter<PredictionFunctor>::setStateCovariance(
 /*
  *
  */
-template <typename PredictionFunctor>
-bool ADKalmanFilter<PredictionFunctor>::isInitialized() const
+template < typename PredictionFunctor >
+bool ADKalmanFilter< PredictionFunctor >::isInitialized() const
 {
   return initialized;
 }
@@ -124,10 +124,10 @@ bool ADKalmanFilter<PredictionFunctor>::isInitialized() const
 /*
  *
  */
-template <typename PredictionFunctor>
-template <typename FType, typename QType, typename... ParamsType>
-void ADKalmanFilter<PredictionFunctor>::predict(
-    const Eigen::MatrixBase<FType> &F, const Eigen::MatrixBase<QType> &Q,
+template < typename PredictionFunctor >
+template < typename FType, typename QType, typename... ParamsType >
+void ADKalmanFilter< PredictionFunctor >::predict(
+    const Eigen::MatrixBase< FType > &F, const Eigen::MatrixBase< QType > &Q,
     const ParamsType &... params)
 {
   /*
@@ -147,10 +147,10 @@ void ADKalmanFilter<PredictionFunctor>::predict(
 /*
  *
  */
-template <typename PredictionFunctor>
-template <typename QType, typename... ParamsType>
-void ADKalmanFilter<PredictionFunctor>::predictAD(
-    const Eigen::MatrixBase<QType> &Q, const ParamsType &... params)
+template < typename PredictionFunctor >
+template < typename QType, typename... ParamsType >
+void ADKalmanFilter< PredictionFunctor >::predictAD(
+    const Eigen::MatrixBase< QType > &Q, const ParamsType &... params)
 {
   /*
    * Error checking.
@@ -162,7 +162,7 @@ void ADKalmanFilter<PredictionFunctor>::predictAD(
    */
   StateType f;
   PredictionJacobianType F;
-  Eigen::AutoDiffJacobian<PredictionFunctor> adjac;
+  Eigen::AutoDiffJacobian< PredictionFunctor > adjac;
 
   adjac(x, &f, &F, params...);
   applyPrediction(f, F, Q);
@@ -171,11 +171,11 @@ void ADKalmanFilter<PredictionFunctor>::predictAD(
 /*
  *
  */
-template <typename PredictionFunctor>
-template <typename fType, typename FType, typename QType>
-void ADKalmanFilter<PredictionFunctor>::applyPrediction(
-    const Eigen::MatrixBase<fType> &f, const Eigen::MatrixBase<FType> &F,
-    const Eigen::MatrixBase<QType> &Q)
+template < typename PredictionFunctor >
+template < typename fType, typename FType, typename QType >
+void ADKalmanFilter< PredictionFunctor >::applyPrediction(
+    const Eigen::MatrixBase< fType > &f, const Eigen::MatrixBase< FType > &F,
+    const Eigen::MatrixBase< QType > &Q)
 {
   /*
    * Error checking.
@@ -205,12 +205,12 @@ void ADKalmanFilter<PredictionFunctor>::applyPrediction(
 /*
  *
  */
-template <typename PredictionFunctor>
-template <typename MeasurementFunctor, typename MeasurementType, typename RType,
-          typename... ParamsType>
-bool ADKalmanFilter<PredictionFunctor>::updateAD(
-    const Eigen::MatrixBase<MeasurementType> &measurement,
-    const Eigen::MatrixBase<RType> &R, const ParamsType &... params)
+template < typename PredictionFunctor >
+template < typename MeasurementFunctor, typename MeasurementType,
+           typename RType, typename... ParamsType >
+bool ADKalmanFilter< PredictionFunctor >::updateAD(
+    const Eigen::MatrixBase< MeasurementType > &measurement,
+    const Eigen::MatrixBase< RType > &R, const ParamsType &... params)
 {
   /*
    * Error checking.
@@ -227,17 +227,16 @@ bool ADKalmanFilter<PredictionFunctor>::updateAD(
   /*
    * Definitions.
    */
-  typedef Eigen::Matrix<Scalar,
-                        MeasurementFunctor::ValueType::RowsAtCompileTime,
-                        MeasurementFunctor::InputType::RowsAtCompileTime>
-      HType;
+  using HType =
+      Eigen::Matrix< Scalar, MeasurementFunctor::ValueType::RowsAtCompileTime,
+                     MeasurementFunctor::InputType::RowsAtCompileTime >;
 
   /*
    * Implementation.
    */
   eigen_assert(initialized == true);
 
-  Eigen::AutoDiffJacobian<MeasurementFunctor> adjac;
+  Eigen::AutoDiffJacobian< MeasurementFunctor > adjac;
   HType Had;
   MeasurementType residual, h;
 
@@ -246,19 +245,19 @@ bool ADKalmanFilter<PredictionFunctor>::updateAD(
   adjac(x, &h, &Had, params...);
   residual = measurement - h;
 
-  return applyResidual<MeasurementFunctor>(Had, residual, R);
+  return applyResidual< MeasurementFunctor >(Had, residual, R);
 }
 
 /*
  *
  */
-template <typename PredictionFunctor>
-template <typename MeasurementFunctor, typename HType, typename MeasurementType,
-          typename RType, typename... ParamsType>
-bool ADKalmanFilter<PredictionFunctor>::update(
-    const Eigen::MatrixBase<HType> &H,
-    const Eigen::MatrixBase<MeasurementType> &measurement,
-    const Eigen::MatrixBase<RType> &R, const ParamsType &... params)
+template < typename PredictionFunctor >
+template < typename MeasurementFunctor, typename HType,
+           typename MeasurementType, typename RType, typename... ParamsType >
+bool ADKalmanFilter< PredictionFunctor >::update(
+    const Eigen::MatrixBase< HType > &H,
+    const Eigen::MatrixBase< MeasurementType > &measurement,
+    const Eigen::MatrixBase< RType > &R, const ParamsType &... params)
 {
   /*
    * Error checking.
@@ -277,31 +276,31 @@ bool ADKalmanFilter<PredictionFunctor>::update(
    */
   eigen_assert(initialized == true);
 
-  Eigen::AutoDiffJacobian<MeasurementFunctor> adjac;
+  Eigen::AutoDiffJacobian< MeasurementFunctor > adjac;
   MeasurementType residual, h;
 
   MeasurementFunctor()(x, &h, params...);
   residual = measurement - h;
-  return applyResidual<MeasurementFunctor>(H, residual, R);
+  return applyResidual< MeasurementFunctor >(H, residual, R);
 }
 
 /*
  *
  */
-template <typename PredictionFunctor>
-template <typename MeasurementFunctor, typename HType, typename MeasurementType,
-          typename RType>
-bool ADKalmanFilter<PredictionFunctor>::applyResidual(
-    const Eigen::MatrixBase<HType> &H,
-    const Eigen::MatrixBase<MeasurementType> &residual,
-    const Eigen::MatrixBase<RType> &R)
+template < typename PredictionFunctor >
+template < typename MeasurementFunctor, typename HType,
+           typename MeasurementType, typename RType >
+bool ADKalmanFilter< PredictionFunctor >::applyResidual(
+    const Eigen::MatrixBase< HType > &H,
+    const Eigen::MatrixBase< MeasurementType > &residual,
+    const Eigen::MatrixBase< RType > &R)
 {
   /*
    * Error checking.
    */
   EIGEN_STATIC_ASSERT(
-      (std::is_same<Scalar,
-                    typename MeasurementFunctor::InputType::Scalar>::value),
+      (std::is_same< Scalar,
+                     typename MeasurementFunctor::InputType::Scalar >::value),
       "PredictionFunctor and MeasurementFunctor are of different Scalar types")
 
   EIGEN_STATIC_ASSERT(
@@ -325,9 +324,8 @@ bool ADKalmanFilter<PredictionFunctor>::applyResidual(
   /*
    * Definitions.
    */
-  typedef Eigen::Matrix<Scalar, StateType::RowsAtCompileTime,
-                        MeasurementType::RowsAtCompileTime>
-      KalmanGainType;
+  using KalmanGainType = Eigen::Matrix< Scalar, StateType::RowsAtCompileTime,
+                                        MeasurementType::RowsAtCompileTime >;
 
   /*
    * Implementation.
@@ -340,7 +338,8 @@ bool ADKalmanFilter<PredictionFunctor>::applyResidual(
    * TODO: Figure out why... */
 
   /* Apply outlier rejection before we do all the heavy calculations. */
-  if (MeasurementFunctor().rejectMeasurement(Sinv, residual) == false) {
+  if (MeasurementFunctor().rejectMeasurement(Sinv, residual) == false)
+  {
     /* Update using the positive Joseph form. */
     KalmanGainType K = P * H.transpose() * Sinv;
     StateCovarianceType KH = StateCovarianceType::Identity() - K * H;
@@ -353,10 +352,9 @@ bool ADKalmanFilter<PredictionFunctor>::applyResidual(
 
     return true;
   }
-  else {
+  else
+  {
     return false;
   }
 }
 }
-
-#endif

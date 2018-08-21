@@ -1,21 +1,21 @@
-#ifndef _AD_KF_OUTLIER_REJECTION_IMPL_H
-#define _AD_KF_OUTLIER_REJECTION_IMPL_H
+#pragma once
 
 #include <Eigen/Dense>
 
-namespace ADKalmanFilter {
-
+namespace ADKalmanFilter
+{
 /**
  * @brief   Used for defining no outlier rejection.
  */
-struct NoOutlierRejection {
+struct NoOutlierRejection
+{
   /**
    * @brief   Required function of the ADKalmanFilter. This version accepts all
    *          measurements.
    *
    * @tparam  Params   List of parameters to ignore.
    */
-  template <typename... Params>
+  template < typename... Params >
   constexpr bool rejectMeasurement(const Params &...) const
   {
     return false;
@@ -25,8 +25,9 @@ struct NoOutlierRejection {
 /**
  * @brief   Mahalanobis distance based outlier rejection.
  */
-template <int NStdDevs>
-struct MahalanobisOutlierRejection {
+template < int NStdDevs >
+struct MahalanobisOutlierRejection
+{
   /**
    * @brief   Required function of the ADKalmanFilter. This version accepts a
    *          measurement if the Mahalanobis distance is below a given
@@ -35,11 +36,11 @@ struct MahalanobisOutlierRejection {
    * @tparam  SMatrix   Type of the inverted S matrix.
    * @tparam  Residual  Type of the residual.
    */
-  template <typename SMatrix, typename Residual>
-  constexpr bool rejectMeasurement(const Eigen::MatrixBase<SMatrix> &Sinv,
-                                   const Eigen::MatrixBase<Residual> &r) const
+  template < typename SMatrix, typename Residual >
+  constexpr bool rejectMeasurement(const Eigen::MatrixBase< SMatrix > &Sinv,
+                                   const Eigen::MatrixBase< Residual > &r) const
   {
-    typedef typename Residual::Scalar Scalar;
+    using Scalar = typename Residual::Scalar;
 
     /* Calculate the Mahalanobis distance: sqrt( r^T * S^-1 * r )
        Simple thresholding for testing measurements. */
@@ -47,5 +48,3 @@ struct MahalanobisOutlierRejection {
   }
 };
 }
-
-#endif

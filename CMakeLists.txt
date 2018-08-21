@@ -9,7 +9,7 @@ option(DO_TESTS "Enable testing using GTest" ON)
 ########################################
 # Enable C++11 and other C++ flags
 ########################################
-set(CMAKE_CXX_STANDARD 11)
+set(CMAKE_CXX_STANDARD 14)
 set(CMAKE_EXPORT_COMPILE_COMMANDS 1)
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-gnu-statement-expression -Wall -Wno-long-long -pedantic")
 

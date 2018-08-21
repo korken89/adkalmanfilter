@@ -1,7 +1,6 @@
 #include <Eigen/Dense>
 
-#ifndef _AD_KF_H
-#define _AD_KF_H
+#pragma once
 
 namespace ADKalmanFilter
 {
@@ -13,7 +12,7 @@ namespace ADKalmanFilter
  * @tparam    N       Number of rows in the input vector (state vector).
  * @tparam    M       Number of rows in the output vector. Defaults to N.
  */
-template <typename Scalar, int N, int M = N>
+template < typename Scalar, int N, int M = N >
 struct BaseFunctor
 {
   /*
@@ -24,36 +23,36 @@ struct BaseFunctor
   /**
    * @typedef   Definition of the input type, will be the state vector size.
    */
-  typedef Eigen::Matrix<Scalar, N, 1> InputType;
+  using InputType = Eigen::Matrix< Scalar, N, 1 >;
 
   /**
    * @typedef   Definition of the value (output) type. It will be the state
    *            vector in the prediction Functor and the measurement size in
    *            the measurement Functor.
    */
-  typedef Eigen::Matrix<Scalar, M, 1> ValueType;
+  using ValueType = Eigen::Matrix< Scalar, M, 1 >;
 
   /**
    * @typedef   Definition of the scalar type, is a helper type.
    */
-  typedef Scalar ScalarType;
+  using ScalarType = Scalar;
 
   /**
    * @typedef   Definition of the Jacobian, is a helper type.
    */
-  typedef Eigen::Matrix<Scalar, M, N> JacobianType;
+  using JacobianType = Eigen::Matrix< Scalar, M, N >;
 
   /**
    * @typedef   Definition of a covariance with the size of the input, is a
    *            helper type.
    */
-  typedef Eigen::Matrix<Scalar, N, N> InputCovarianceType;
+  using InputCovarianceType = Eigen::Matrix< Scalar, N, N >;
 
   /**
    * @typedef   Definition of a covariance with the size of the output, is a
    *            helper type.
    */
-  typedef Eigen::Matrix<Scalar, M, M> OutputCovarianceType;
+  using OutputCovarianceType = Eigen::Matrix< Scalar, M, M >;
 };
 
 /**
@@ -69,10 +68,10 @@ struct BaseFunctor
  * @param[out] J      Jacobian output.
  * @param[in] params  List of optional parameters and control signals.
  */
-template <typename Functor, typename InputType, typename JType,
-          typename... ParamsType>
-static void getJacobianAD(const Eigen::MatrixBase<InputType>& input,
-                          Eigen::MatrixBase<JType>& J,
+template < typename Functor, typename InputType, typename JType,
+           typename... ParamsType >
+static void getJacobianAD(const Eigen::MatrixBase< InputType >& input,
+                          Eigen::MatrixBase< JType >& J,
                           const ParamsType&... params);
 
 /**
@@ -97,7 +96,7 @@ static void getJacobianAD(const Eigen::MatrixBase<InputType>& input,
  * @tparam  PredictionFunctor   Functor performing the Kalman Filter
  *                              predictions.
  */
-template <typename PredictionFunctor>
+template < typename PredictionFunctor >
 class ADKalmanFilter
 {
 public:
@@ -126,24 +125,24 @@ public:
    * @typedef   Defines the scalar type of the filter from the prediction
    *            Functor's type. The measurement Functor must use this type.
    */
-  typedef typename PredictionFunctor::ScalarType Scalar;
+  using Scalar = typename PredictionFunctor::ScalarType;
 
   /**
    * @typedef   Defines the state type from the prediction Functor. The
    *            measurement Functor's input type must be the same.
    */
-  typedef typename PredictionFunctor::InputType StateType;
+  using StateType = typename PredictionFunctor::InputType;
 
   /**
    * @typedef   Uses the state type to infer the size of the state covariance.
    */
-  typedef typename PredictionFunctor::InputCovarianceType StateCovarianceType;
+  using StateCovarianceType = typename PredictionFunctor::InputCovarianceType;
 
   /**
    * @typedef   Uses the state covariance type to infer the size of the
    *            prediction Jacobian.
    */
-  typedef typename PredictionFunctor::JacobianType PredictionJacobianType;
+  using PredictionJacobianType = typename PredictionFunctor::JacobianType;
 
   /**
    * @brief Default constructor.
@@ -159,9 +158,9 @@ public:
    * @param[in] x_init	Starting value for the state.
    * @param[in] P_init  Starting value for the covariance.
    */
-  template <typename xType, typename PType>
-  ADKalmanFilter(const Eigen::MatrixBase<xType>& x_init,
-                 const Eigen::MatrixBase<PType>& P_init);
+  template < typename xType, typename PType >
+  ADKalmanFilter(const Eigen::MatrixBase< xType >& x_init,
+                 const Eigen::MatrixBase< PType >& P_init);
 
   /**
    * @brief 	Initializes or reinitializes the filter.
@@ -172,9 +171,9 @@ public:
    * @param[in] x_init  Starting value for the state.
    * @param[in] P_init  Starting value for the covariance.
    */
-  template <typename xType, typename PType>
-  void init(const Eigen::MatrixBase<xType>& x_init,
-            const Eigen::MatrixBase<PType>& P_init);
+  template < typename xType, typename PType >
+  void init(const Eigen::MatrixBase< xType >& x_init,
+            const Eigen::MatrixBase< PType >& P_init);
 
   /**
    * @brief  Getter function for the state.
@@ -183,8 +182,8 @@ public:
    *
    * @param[out] x_out  Output of the state.
    */
-  template <typename xType>
-  void getState(Eigen::MatrixBase<xType>& x_out);
+  template < typename xType >
+  void getState(Eigen::MatrixBase< xType >& x_out);
 
   /**
    * @brief  Setter function for the state.
@@ -193,8 +192,8 @@ public:
    *
    * @param[in] x_in    Input for the state.
    */
-  template <typename xType>
-  void setState(const Eigen::MatrixBase<xType>& x_in);
+  template < typename xType >
+  void setState(const Eigen::MatrixBase< xType >& x_in);
 
   /**
    * @brief  Getter function for the state covariance.
@@ -203,8 +202,8 @@ public:
    *
    * @param[out] x_out  Output of the state covariance.
    */
-  template <typename PType>
-  void getStateCovariance(Eigen::MatrixBase<PType>& P_out);
+  template < typename PType >
+  void getStateCovariance(Eigen::MatrixBase< PType >& P_out);
 
   /**
    * @brief  Setter function for the state covariance.
@@ -213,8 +212,8 @@ public:
    *
    * @param[in] x_in    Input for the state covariance.
    */
-  template <typename PType>
-  void setStateCovariance(const Eigen::MatrixBase<PType>& P_in);
+  template < typename PType >
+  void setStateCovariance(const Eigen::MatrixBase< PType >& P_in);
 
   /**
    * @brief  Returns if the filter has been initialized.
@@ -237,9 +236,10 @@ public:
    * @param[in] Q       Prediction covariance input.
    * @param[in] params  List of optional parameters and control signals.
    */
-  template <typename FType, typename QType, typename... ParamsType>
-  void predict(const Eigen::MatrixBase<FType>& F,
-               const Eigen::MatrixBase<QType>& Q, const ParamsType&... params);
+  template < typename FType, typename QType, typename... ParamsType >
+  void predict(const Eigen::MatrixBase< FType >& F,
+               const Eigen::MatrixBase< QType >& Q,
+               const ParamsType&... params);
 
   /**
    * @brief  Performs a prediction without a supplied prediction Jacobian and
@@ -251,8 +251,8 @@ public:
    * @param[in] Q       Prediction covariance input.
    * @param[in] params  List of optional parameters and control signals.
    */
-  template <typename QType, typename... ParamsType>
-  void predictAD(const Eigen::MatrixBase<QType>& Q,
+  template < typename QType, typename... ParamsType >
+  void predictAD(const Eigen::MatrixBase< QType >& Q,
                  const ParamsType&... params);
 
   /**
@@ -267,10 +267,10 @@ public:
    * @param[in] F   Prediction Jacobian.
    * @param[in] Q   Prediction covariance.
    */
-  template <typename fType, typename FType, typename QType>
-  void applyPrediction(const Eigen::MatrixBase<fType>& f,
-                       const Eigen::MatrixBase<FType>& F,
-                       const Eigen::MatrixBase<QType>& Q);
+  template < typename fType, typename FType, typename QType >
+  void applyPrediction(const Eigen::MatrixBase< fType >& f,
+                       const Eigen::MatrixBase< FType >& F,
+                       const Eigen::MatrixBase< QType >& Q);
 
   /**
    * @brief  Performs a measurement update of the filter utilizing the supplied
@@ -291,10 +291,11 @@ public:
    * @return  Returns true if the measurement was accepted. False indicates
    *          that the outlier rejection rejected the measurement.
    */
-  template <typename MeasurementFunctor, typename MeasurementType,
-            typename RType, typename... ParamsType>
-  bool updateAD(const Eigen::MatrixBase<MeasurementType>& measurement,
-                const Eigen::MatrixBase<RType>& R, const ParamsType&... params);
+  template < typename MeasurementFunctor, typename MeasurementType,
+             typename RType, typename... ParamsType >
+  bool updateAD(const Eigen::MatrixBase< MeasurementType >& measurement,
+                const Eigen::MatrixBase< RType >& R,
+                const ParamsType&... params);
 
   /**
    * @brief  Performs a measurement update of the filter utilizing the supplied
@@ -315,11 +316,11 @@ public:
    * @return  Returns true if the measurement was accepted. False indicates
    *          that the outlier rejection rejected the measurement.
    */
-  template <typename MeasurementFunctor, typename HType,
-            typename MeasurementType, typename RType, typename... ParamsType>
-  bool update(const Eigen::MatrixBase<HType>& H,
-              const Eigen::MatrixBase<MeasurementType>& measurement,
-              const Eigen::MatrixBase<RType>& R, const ParamsType&... params);
+  template < typename MeasurementFunctor, typename HType,
+             typename MeasurementType, typename RType, typename... ParamsType >
+  bool update(const Eigen::MatrixBase< HType >& H,
+              const Eigen::MatrixBase< MeasurementType >& measurement,
+              const Eigen::MatrixBase< RType >& R, const ParamsType&... params);
 
   /**
    * @brief  Applies a calculated residual, from one of the update functions,
@@ -337,11 +338,11 @@ public:
    * @return  Returns true if the measurement was accepted. False indicates
    *          that the outlier rejection rejected the measurement.
    */
-  template <typename MeasurementFunctor, typename HType,
-            typename MeasurementType, typename RType>
-  bool applyResidual(const Eigen::MatrixBase<HType>& H,
-                     const Eigen::MatrixBase<MeasurementType>& residual,
-                     const Eigen::MatrixBase<RType>& R);
+  template < typename MeasurementFunctor, typename HType,
+             typename MeasurementType, typename RType >
+  bool applyResidual(const Eigen::MatrixBase< HType >& H,
+                     const Eigen::MatrixBase< MeasurementType >& residual,
+                     const Eigen::MatrixBase< RType >& R);
 
 private:
   /**
@@ -361,7 +362,5 @@ private:
 };
 }
 
-#endif
-
-#include "adkalmanfilter/implementation/adkalmanfilter_impl.h"
-#include "adkalmanfilter/implementation/outlierrejection_impl.h"
+#include "adkalmanfilter/implementation/adkalmanfilter_impl.hpp"
+#include "adkalmanfilter/implementation/outlierrejection_impl.hpp"

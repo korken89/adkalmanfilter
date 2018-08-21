@@ -1,6 +1,6 @@
 #include <Eigen/Dense>
 #include <fstream>
-#include "adkalmanfilter/adkalmanfilter.h"
+#include "adkalmanfilter/adkalmanfilter.hpp"
 #include "gtest/gtest.h"
 
 /*
